@@ -1,0 +1,21 @@
+{
+  "name": "Connecteam Position View",
+  "version": "1.1",
+  "description": "Adds new buttons that will export the shifts visible in Connecteam scheduling to CSV files",
+  "manifest_version": 3,
+  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "host_permissions": ["https://app.connecteam.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://*.connecteam.com/*"],
+      "js": ["pageAction.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["chart.umd.min.js"],
+      "matches": ["https://*/*"]
+    }
+  ]
+}
