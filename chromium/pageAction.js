@@ -96,7 +96,7 @@ function openSchedulePopup(days) {
   const newWindow = window.open(
     chrome.runtime.getURL("popup/index.html"),
     null,
-    "width=500,height=500,status=yes,toolbar=no,menubar=no,location=no"
+    "width=1000,height=750,status=yes,toolbar=no,menubar=no,location=no"
   );
   console.log(newWindow);
 }
