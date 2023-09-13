@@ -23,10 +23,6 @@ let injected = false;
 async function inject() {
   console.log("Injecting");
 
-  // Add the plotly.js script
-  addScript("https://cdn.plot.ly/plotly-2.25.2.min.js", true);
-  console.log("Added plotly.js");
-
   // Add buttons
   const buttons = document.getElementsByClassName("buttons")[0];
   if (buttons) {
@@ -40,6 +36,8 @@ async function inject() {
 
     // Add button to the page
     buttons.appendChild(shiftsButton);
+
+    console.log("Buttons added");
   }
 }
 
@@ -59,33 +57,48 @@ async function createPositionView() {
     const job = jobs.find((job) => job.id === jobId);
     const user = users.find((user) => user.id === userId);
 
+    // Return job title, user's name, and start and end times
     return {
       jobTitle: job.title,
-      userName: `${user.firstname} ${user.lastname}`,
+      name: `${user.firstname} ${user.lastname}`,
       startTime: new Date(startTime * 1000),
       endTime: new Date(endTime * 1000),
     };
   });
 
-  console.log(assignedShifts);
+  // Sort shifts into days
+  const days = {};
+  const dayNames = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  for (const shift of assignedShifts) {
+    // Get the day of the shift
+    const day = dayNames[shift.startTime.getDay()];
+
+    // Make array of shifts for the day if it doesn't exist
+    if (!days[day]) days[day] = [];
+
+    // Add shift to the day
+    days[day].push(shift);
+  }
+
+  localStorage.setItem("days", JSON.stringify(days));
+  openSchedulePopup(days);
 }
 
-// Function to add a script tag to the page
-function addScript(url, external = false) {
-  // Get extension url if internal
-  if (!external) url = chrome.runtime.getURL(url);
-
-  // Create and add script tag
-  const script = document.createElement("script");
-  script.src = url;
-  const elem = (
-    document.body ||
-    document.head ||
-    document.documentElement
-  ).appendChild(script);
-
-  // Return true if the script was added
-  return !!elem;
+function openSchedulePopup(days) {
+  const newWindow = window.open(
+    chrome.runtime.getURL("popup/index.html"),
+    null,
+    "width=500,height=500,status=yes,toolbar=no,menubar=no,location=no"
+  );
+  console.log(newWindow);
 }
 
 async function getShifts() {
@@ -110,11 +123,13 @@ async function getShifts() {
   if (!res.ok) {
     console.log("Error fetching shifts");
     return;
-  } else console.log("Shifts fetched");
+  }
 
   // Return shifts
   const json = await res.json();
   const shifts = json.data.shifts;
+  console.log(`${shifts.length} shifts fetched`);
+
   return shifts;
 }
 
@@ -140,11 +155,14 @@ async function getJobsAndUsers() {
   if (!res.ok) {
     console.log("Error fetching job ids");
     return;
-  } else console.log("Job ids fetched");
+  }
 
   // Return jobs and users
   const json = await res.json();
   const jobs = json.data.scheduler_user_data.jobs;
   const users = json.data.scheduler_user_data.users;
+  console.log(`${jobs.length} jobs fetched`);
+  console.log(`${users.length} users fetched`);
+
   return { jobs, users };
 }
