@@ -93,15 +93,14 @@ async function createPositionView() {
 }
 
 function openSchedulePopup(days) {
-  const newWindow = window.open(
-    chrome.runtime.getURL("popup/index.html"),
-    null,
-    "width=1000,height=750,status=yes,toolbar=no,menubar=no,location=no"
-  );
-  console.log(newWindow);
+  chrome.storage.local.set({ days });
+  chrome.runtime.sendMessage({});
 }
 
 async function getShifts() {
+  // Get the date range
+  const { startDate, endDate } = getDateRange();
+
   // Get shifts from api
   const res = await fetch(
     "https://app.connecteam.com/api/UserDashboard/ShiftScheduler/Shifts/",
@@ -113,8 +112,18 @@ async function getShifts() {
         "content-type": "application/json",
         pragma: "no-cache",
       },
-      body: '{"objectId":"3342741","courseId":"2881759","startDate":"2023-09-09T06:00:00.000Z","endDate":"2023-09-17T06:00:00.000Z","timezone":"America/Denver","_spirit":"84df7edd-eb90-4a38-9f25-5b6fe905be3e"}',
+      referrer: "https://app.connecteam.com/index.html",
+      referrerPolicy: "strict-origin-when-cross-origin",
+      body: JSON.stringify({
+        objectId: "3342741",
+        courseId: "2881759",
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        timezone: "America/Denver",
+        _spirit: getCookie("_spirit"),
+      }),
       method: "POST",
+      mode: "cors",
       credentials: "include",
     }
   );
@@ -139,12 +148,15 @@ async function getJobsAndUsers() {
     "https://app.connecteam.com/api/UserDashboard/ShiftScheduler/Data/?objectId=3342741&courseId=2881759",
     {
       headers: {
+        accept: "application/json, text/plain, */*",
         "accept-language": "en-US,en;q=0.9",
         "cache-control": "no-cache",
         "content-type": "application/json",
+        pragma: "no-cache",
       },
       referrer: "https://app.connecteam.com/index.html",
       referrerPolicy: "strict-origin-when-cross-origin",
+      body: null,
       method: "GET",
       mode: "cors",
       credentials: "include",
@@ -165,4 +177,33 @@ async function getJobsAndUsers() {
   console.log(`${users.length} users fetched`);
 
   return { jobs, users };
+}
+
+function getCookie(cname) {
+  // Get cookie by name
+  const name = cname + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookies = decodedCookie.split("; ");
+
+  // Look through cookies until one with the correct name is found
+  for (const cookie of cookies) {
+    if (cookie.startsWith(name)) return cookie.split("=")[1];
+  }
+
+  // Return null if none is found
+  return null;
+}
+
+function getDateRange() {
+  // Calculate last Sunday and next Sunday
+  const today = new Date();
+  const startDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - today.getDay() - 1
+  );
+  const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  // Return the dates
+  return { startDate, endDate };
 }
