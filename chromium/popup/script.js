@@ -10,7 +10,6 @@ const dayNames = [
 ];
 let currentDay = dayNames[new Date().getDay()];
 
-
 $(async () => {
   // Get days from local storage
   const { days } = await chrome.storage.local.get(["days"]);
@@ -21,11 +20,7 @@ $(async () => {
       shift.endTime = new Date(shift.endTime);
     }
   }
-  
-  // Default selected day to today
-  const currentSchedule = $("#current-schedule");
-  currentSchedule.text("Viewing Schedule: " + titleCase(currentDay));
-  
+
   // Create chart of selected day
   createPlot(days[currentDay]);
 });
@@ -33,12 +28,61 @@ $(async () => {
 function createPlot(shifts) {
   // Sort shifts by job title
   shifts.sort((a, b) => a.jobTitle.localeCompare(b.jobTitle));
-  
-  const chart = $("#chart")[0];
-  Plotly.newPlot("chart", [{
-    x: [1, 2, 3, 4, 5],
-    y: [1, 2, 4, 6, 16]
-  }, {margin: { t: 0 }}]);
+
+  // Get colors for each job
+  const shiftColors = shifts.map(({ jobTitle }) =>
+    getColor(getLexographicValue(jobTitle))
+  );
+
+  // Set chart data
+  const durations = shifts.map(
+    ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
+  );
+  const startTimes = shifts.map(({ startTime }) => startTime.getTime());
+  const data = [
+    {
+      type: "bar",
+      mode: "lines",
+      x: durations,
+      base: startTimes,
+      marker: {
+        color: shiftColors.map((color) => color + "50"),
+        line: {
+          color: shiftColors,
+          width: 2,
+        },
+      },
+    },
+  ];
+
+  // Set layout
+  const now = new Date();
+  const layout = {
+    title: `<b>${titleCase(currentDay)} Schedule</b>`,
+    xaxis: {
+      title: "Time",
+      type: "date",
+      tickformat: "%I:%M %p",
+      tickmode: "linear",
+      dtick: 30 * 60 * 1000,
+      minor: {
+        tickmode: "linear",
+        dtick: 15 * 60 * 1000,
+        showgrid: true,
+      },
+    },
+    yaxis: {
+      title: "Position",
+      type: "category",
+      tickmode: "array",
+      tickvals: shifts.map((_, i) => i),
+      ticktext: shifts.map(({ jobTitle }) => jobTitle),
+      showgrid: true,
+    },
+  };
+
+  // Create chart
+  Plotly.newPlot("chart", data, layout, { displayModeBar: false });
 }
 
 // Get ascii value of string
@@ -63,12 +107,21 @@ function getColor(val) {
   const rgbRange = [0, 255];
 
   // Map value to RGB
-  const r = map(val % 256, valRange, rgbRange);
-  const g = map(Math.floor(val / 256) % 256, valRange, rgbRange);
-  const b = map(Math.floor(val / 256 ** 2) % 256, valRange, rgbRange);
+  const r = Math.floor(map(val % 256, valRange, rgbRange) * RGB_MULT);
+  const g = Math.floor(
+    map(Math.floor(val / 256) % 256, valRange, rgbRange) * RGB_MULT
+  );
+  const b = Math.floor(
+    map(Math.floor(val / 256 ** 2) % 256, valRange, rgbRange) * RGB_MULT
+  );
 
-  // Make sure RGB values are big enough and integers
-  return [r * RGB_MULT, g * RGB_MULT, b * RGB_MULT].map((v) => Math.floor(v));
+  // Convert to hex
+  const hex =
+    "#" +
+    r.toString(16).padStart(2, "0") +
+    g.toString(16).padStart(2, "0") +
+    b.toString(16).padStart(2, "0");
+  return hex;
 }
 
 // Map a value from one range to another
@@ -84,4 +137,27 @@ function titleCase(str) {
     .split(" ")
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+
+function generateIntervalRange(startTimeStr, endTimeStr) {
+  // Parse the input time strings into Date objects with a common date (e.g., 1970-01-01)
+  const commonDate = new Date();
+  const startTime = new Date(`${commonDate.toDateString()} ${startTimeStr}`);
+  const endTime = new Date(`${commonDate.toDateString()} ${endTimeStr}`);
+
+  // Check if the input times are valid
+  if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+    return [];
+  }
+
+  // Initialize an array to store the intervals
+  const intervalRange = [];
+
+  // Create intervals of 30 minutes until the end time is reached
+  while (startTime < endTime) {
+    intervalRange.push(new Date(startTime));
+    startTime.setMinutes(startTime.getMinutes() + 30);
+  }
+
+  return intervalRange;
 }

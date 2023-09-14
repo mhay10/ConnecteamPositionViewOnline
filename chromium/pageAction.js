@@ -93,7 +93,7 @@ async function createPositionView() {
 }
 
 function openSchedulePopup(days) {
-    console.log(days);
+  console.log("Opening schedule popup");
   chrome.storage.local.set({ days });
   chrome.runtime.sendMessage({});
 }
