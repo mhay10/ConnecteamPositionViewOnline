@@ -9,10 +9,11 @@ const dayNames = [
   "saturday",
 ];
 let currentDay = dayNames[new Date().getDay()];
+let days = {};
 
 $(async () => {
   // Get days from local storage
-  const { days } = await chrome.storage.local.get(["days"]);
+  days = (await chrome.storage.local.get(["days"])).days;
   for (const day of Object.keys(days)) {
     // Convert start and end times to Date objects
     const shifts = days[day];
@@ -22,9 +23,27 @@ $(async () => {
     }
   }
 
+  $("#next").on("click", getNextDay);
+  $("#back").on("click", getPrevDay);
+
   // Create chart of selected day
   createPlot(days[currentDay]);
 });
+
+// Get next day
+function getNextDay() {
+  currentDay = dayNames[(dayNames.indexOf(currentDay) + 1) % dayNames.length];
+  createPlot(days[currentDay]);
+}
+
+// Get previous day
+function getPrevDay() {
+  currentDay =
+    dayNames[
+      (dayNames.indexOf(currentDay) + dayNames.length - 1) % dayNames.length
+    ];
+  createPlot(days[currentDay]);
+}
 
 function createPlot(shifts) {
   // Sort shifts by job title
@@ -62,7 +81,6 @@ function createPlot(shifts) {
         },
       },
       text: shifts.map(({ name }) => `<b>${name}</b>`),
-      textposition: "center",
       hoverinfo: "text",
       hovertext: hoverText,
     },
