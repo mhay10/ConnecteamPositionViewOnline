@@ -1,3 +1,7 @@
+body {
+  text-align: center;
+}
+
 #schedules {
   display: flex;
   flex-direction: row;

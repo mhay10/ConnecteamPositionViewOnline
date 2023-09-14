@@ -14,6 +14,7 @@ $(async () => {
   // Get days from local storage
   const { days } = await chrome.storage.local.get(["days"]);
   for (const day of Object.keys(days)) {
+    // Convert start and end times to Date objects
     const shifts = days[day];
     for (const shift of shifts) {
       shift.startTime = new Date(shift.startTime);
@@ -34,15 +35,23 @@ function createPlot(shifts) {
     getColor(getLexographicValue(jobTitle))
   );
 
+  // Create hover popup text
+  const hoverText = shifts.map(({ name, jobTitle, startTime, endTime }) => {
+    return `<b>${jobTitle}</b><br>${formatDate(startTime)} - ${formatDate(
+      endTime
+    )}`;
+  });
+
   // Set chart data
   const durations = shifts.map(
     ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
   );
   const startTimes = shifts.map(({ startTime }) => startTime.getTime());
+  const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
   const data = [
     {
       type: "bar",
-      mode: "lines",
+      mode: "text",
       x: durations,
       base: startTimes,
       marker: {
@@ -52,17 +61,21 @@ function createPlot(shifts) {
           width: 2,
         },
       },
+      text: shifts.map(({ name }) => `<b>${name}</b>`),
+      textposition: "center",
+      hoverinfo: "text",
+      hovertext: hoverText,
     },
   ];
 
   // Set layout
-  const now = new Date();
   const layout = {
     title: `<b>${titleCase(currentDay)} Schedule</b>`,
     xaxis: {
-      title: "Time",
+      title: "<b>Time</b>",
       type: "date",
       tickformat: "%I:%M %p",
+      tickangle: -50,
       tickmode: "linear",
       dtick: 30 * 60 * 1000,
       minor: {
@@ -70,14 +83,17 @@ function createPlot(shifts) {
         dtick: 15 * 60 * 1000,
         showgrid: true,
       },
+      fixedrange: true,
     },
     yaxis: {
-      title: "Position",
+      title: "<b>Position</b>",
       type: "category",
       tickmode: "array",
+      automargin: true,
       tickvals: shifts.map((_, i) => i),
-      ticktext: shifts.map(({ jobTitle }) => jobTitle),
+      ticktext: jobTitles,
       showgrid: true,
+      fixedrange: true,
     },
   };
 
@@ -132,6 +148,7 @@ function map(value, fromRange, toRange) {
   return ((value - fromMin) * (toMax - toMin)) / (fromMax - fromMin) + toMin;
 }
 
+// Capitalize the first letter of each word in a string
 function titleCase(str) {
   return str
     .split(" ")
@@ -139,6 +156,7 @@ function titleCase(str) {
     .join(" ");
 }
 
+// Generate 30 minute intervals between two times
 function generateIntervalRange(startTimeStr, endTimeStr) {
   // Parse the input time strings into Date objects with a common date (e.g., 1970-01-01)
   const commonDate = new Date();
@@ -160,4 +178,14 @@ function generateIntervalRange(startTimeStr, endTimeStr) {
   }
 
   return intervalRange;
+}
+
+// Format a date as "HH:MM AM/PM"
+function formatDate(date) {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const isAM = hours < 12;
+  const hour = hours % 12 || 12;
+
+  return `${hour}:${minutes.toString().padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
 }
