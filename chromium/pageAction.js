@@ -61,8 +61,8 @@ async function createPositionView() {
     return {
       jobTitle: job.title,
       name: `${user.firstname} ${user.lastname}`,
-      startTime: new Date(startTime * 1000),
-      endTime: new Date(endTime * 1000),
+      startTime: new Date(startTime * 1000).toISOString(),
+      endTime: new Date(endTime * 1000).toISOString(),
     };
   });
 
@@ -79,7 +79,7 @@ async function createPositionView() {
   ];
   for (const shift of assignedShifts) {
     // Get the day of the shift
-    const day = dayNames[shift.startTime.getDay()];
+    const day = dayNames[new Date(shift.startTime).getDay()];
 
     // Make array of shifts for the day if it doesn't exist
     if (!days[day]) days[day] = [];
@@ -93,6 +93,7 @@ async function createPositionView() {
 }
 
 function openSchedulePopup(days) {
+    console.log(days);
   chrome.storage.local.set({ days });
   chrome.runtime.sendMessage({});
 }

@@ -1,6 +1,15 @@
-#root {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
+#schedules {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+#chart {
+  width: 600px;
+  height: 500px;
+}
+
+.navigation {
+  width: 100px;
 }
