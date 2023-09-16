@@ -12,6 +12,13 @@ const observer = new MutationObserver(async (mutList) => {
   }
 });
 
+// Inject when job scheduler is opened
+window.onhashchange = () => {
+  const url = document.URL;
+  if (url.match(/shiftscheduler/) != null)
+    observer.observe(document, { childList: true, subtree: true });
+};
+
 // Check if the page is the correct one
 const url = document.URL;
 if (url.match(/shiftscheduler/) != null)

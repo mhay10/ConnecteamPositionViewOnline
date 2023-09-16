@@ -67,10 +67,13 @@ function createPlot(shifts) {
   );
   const startTimes = shifts.map(({ startTime }) => startTime.getTime());
   const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
+  const names = shifts.map(({ name }) => {
+    const split = name.split(" ");
+    return `${split[0]} ${split[split.length - 1][0]}`;
+  });
   const data = [
     {
       type: "bar",
-      mode: "text",
       x: durations,
       base: startTimes,
       marker: {
@@ -80,9 +83,13 @@ function createPlot(shifts) {
           width: 2,
         },
       },
-      text: shifts.map(({ name }) => `<b>${name}</b>`),
-      hoverinfo: "text",
-      hovertext: hoverText,
+      textposition: "inside",
+      text: names.map((name) => `<b>${name}</b>`),
+      insidetextanchor: "middle",
+      insidetextfont: {
+        size: 14,
+        family: "Arial",
+      },
     },
   ];
 
@@ -108,11 +115,12 @@ function createPlot(shifts) {
       type: "category",
       tickmode: "array",
       automargin: true,
-      tickvals: shifts.map((_, i) => i),
+      tickvals: jobTitles.map((_, i) => i),
       ticktext: jobTitles,
       showgrid: true,
       fixedrange: true,
     },
+    annotations: shifts.map(({ startTime, endTime }) => {}),
   };
 
   // Create chart
@@ -141,12 +149,14 @@ function getColor(val) {
   const rgbRange = [0, 255];
 
   // Map value to RGB
-  const r = Math.floor(map(val % 256, valRange, rgbRange) * RGB_MULT);
-  const g = Math.floor(
-    map(Math.floor(val / 256) % 256, valRange, rgbRange) * RGB_MULT
+  const r = Math.abs(Math.floor(map(val % 256, valRange, rgbRange) * RGB_MULT));
+  const g = Math.abs(
+    Math.floor(map(Math.floor(val / 256) % 256, valRange, rgbRange) * RGB_MULT)
   );
-  const b = Math.floor(
-    map(Math.floor(val / 256 ** 2) % 256, valRange, rgbRange) * RGB_MULT
+  const b = Math.abs(
+    Math.floor(
+      map(Math.floor(val / 256 ** 2) % 256, valRange, rgbRange) * RGB_MULT
+    )
   );
 
   // Convert to hex
@@ -172,30 +182,6 @@ function titleCase(str) {
     .split(" ")
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
-}
-
-// Generate 30 minute intervals between two times
-function generateIntervalRange(startTimeStr, endTimeStr) {
-  // Parse the input time strings into Date objects with a common date (e.g., 1970-01-01)
-  const commonDate = new Date();
-  const startTime = new Date(`${commonDate.toDateString()} ${startTimeStr}`);
-  const endTime = new Date(`${commonDate.toDateString()} ${endTimeStr}`);
-
-  // Check if the input times are valid
-  if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-    return [];
-  }
-
-  // Initialize an array to store the intervals
-  const intervalRange = [];
-
-  // Create intervals of 30 minutes until the end time is reached
-  while (startTime < endTime) {
-    intervalRange.push(new Date(startTime));
-    startTime.setMinutes(startTime.getMinutes() + 30);
-  }
-
-  return intervalRange;
 }
 
 // Format a date as "HH:MM AM/PM"
