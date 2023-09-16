@@ -87,9 +87,12 @@ function createPlot(shifts) {
       text: names.map((name) => `<b>${name}</b>`),
       insidetextanchor: "middle",
       insidetextfont: {
-        size: 14,
+        size: 13,
         family: "Arial",
       },
+      constraintext: "none",
+      hoverinfo: "text",
+      hovertext: hoverText,
     },
   ];
 
@@ -120,7 +123,6 @@ function createPlot(shifts) {
       showgrid: true,
       fixedrange: true,
     },
-    annotations: shifts.map(({ startTime, endTime }) => {}),
   };
 
   // Create chart
