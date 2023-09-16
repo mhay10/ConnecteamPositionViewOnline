@@ -66,6 +66,7 @@ function createPlot(shifts) {
     ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
   );
   const startTimes = shifts.map(({ startTime }) => startTime.getTime());
+  const endTimes = shifts.map(({ endTime }) => endTime.getTime());
   const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
   const names = shifts.map(({ name }) => {
     const split = name.split(" ");
@@ -87,7 +88,7 @@ function createPlot(shifts) {
       text: names.map((name) => `<b>${name}</b>`),
       insidetextanchor: "middle",
       insidetextfont: {
-        size: 13,
+        size: 14,
         family: "Arial",
       },
       constraintext: "none",
@@ -95,6 +96,37 @@ function createPlot(shifts) {
       hovertext: hoverText,
     },
   ];
+
+  // Create start and end time annotations
+  const startTimeAnnotations = shifts.map(({ startTime }, i) => ({
+    x: startTime,
+    y: i,
+    xref: "x",
+    yref: "y",
+    text: `<b>${formatDate(startTime)}</b>`,
+    showarrow: false,
+    font: {
+      size: 13,
+      family: "Arial",
+    },
+    xanchor:
+      startTime.getHours() + startTime.getMinutes() / 60 < 8.25
+        ? "left"
+        : "right",
+  }));
+  const endTimeAnnotations = shifts.map(({ endTime }, i) => ({
+    x: endTime,
+    y: i,
+    xref: "x",
+    yref: "y",
+    text: `<b>${formatDate(endTime)}</b>`,
+    showarrow: false,
+    font: {
+      size: 13,
+      family: "Arial",
+    },
+    xanchor: "left",
+  }));
 
   // Set layout
   const layout = {
@@ -111,7 +143,12 @@ function createPlot(shifts) {
         dtick: 15 * 60 * 1000,
         showgrid: true,
       },
-      fixedrange: true,
+      autorange: false,
+      // Set range to 15 minutes before first shift and 15 minutes after last shift
+      range: [
+        new Date(Math.min(...startTimes) - 25 * 60 * 1000),
+        new Date(Math.max(...endTimes) + 25 * 60 * 1000),
+      ],
     },
     yaxis: {
       title: "<b>Position</b>",
@@ -123,6 +160,7 @@ function createPlot(shifts) {
       showgrid: true,
       fixedrange: true,
     },
+    annotations: [...startTimeAnnotations, ...endTimeAnnotations],
   };
 
   // Create chart
