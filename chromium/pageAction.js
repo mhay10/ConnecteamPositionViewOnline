@@ -12,6 +12,19 @@ const observer = new MutationObserver(async (mutList) => {
   }
 });
 
+// Get user set options
+let debugMode;
+
+chrome.storage.sync.get(['debugModeSet'], function (result) {
+    debugMode = result.debugModeSet;
+
+    // Log settings
+    console.log("debugMode set to:");
+    console.log(debugMode);
+});
+
+
+
 // Check if the page is the correct one
 const url = document.URL;
 if (url.match(/shiftscheduler/) != null)
