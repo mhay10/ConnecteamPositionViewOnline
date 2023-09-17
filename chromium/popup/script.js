@@ -86,9 +86,14 @@ function createPlot(shifts) {
     },
   ];
 
+  let chartHeight = $("#chart").offsetHeight;
+  let chartWidth = $("#chart").offsetWidth;
+
   // Set layout
   const layout = {
     title: `<b>${titleCase(currentDay)} Schedule</b>`,
+    width: chartWidth, //window.screen.availWidth * 0.89,
+    height: window.screen.availHeight * 0.9,
     xaxis: {
       title: "<b>Time</b>",
       type: "date",

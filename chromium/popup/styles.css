@@ -6,14 +6,55 @@ body {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-evenly;
 }
 
 #chart {
-  width: 1000px;
-  height: 750px;
+  width: 90%;
+  height: 90%;
 }
 
 .navigation {
   width: 100px;
+  margin: 5px;
+}
+
+button {
+    height: 40px;
+    font-size: 15px;
+    position: relative;
+    text-align: center;
+    padding: 0 16px;
+    line-height: 0;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 20px;
+    color: #2998ff;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+
+button:hover:enabled {
+  border: 1px solid #44a6ff;
+}
+
+.downloadButton {
+  text-align: center;
+}
+
+.chart {
+  border: 1px solid #d9d9d9;
+}
+
+.nav-text {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-button {
+  width: 100%;
+  margin: auto;
+  display: flex;
+  justify-content: center;
 }
