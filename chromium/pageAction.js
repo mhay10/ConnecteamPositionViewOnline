@@ -133,7 +133,7 @@ async function getShifts() {
         courseId: "2881759",
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        timezone: "America/Denver",
+        timezone: "UTC",
         _spirit: getCookie("_spirit"),
       }),
       method: "POST",
