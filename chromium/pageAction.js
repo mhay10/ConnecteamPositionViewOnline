@@ -12,6 +12,7 @@ const observer = new MutationObserver(async (mutList) => {
   }
 });
 
+
 // Get user set options
 let debugMode;
 
@@ -23,6 +24,14 @@ chrome.storage.sync.get(['debugModeSet'], function (result) {
     console.log(debugMode);
 });
 
+
+
+// Inject when job scheduler is opened
+window.onhashchange = () => {
+  const url = document.URL;
+  if (url.match(/shiftscheduler/) != null)
+    observer.observe(document, { childList: true, subtree: true });
+};
 
 
 // Check if the page is the correct one

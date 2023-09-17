@@ -66,11 +66,15 @@ function createPlot(shifts) {
     ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
   );
   const startTimes = shifts.map(({ startTime }) => startTime.getTime());
+  const endTimes = shifts.map(({ endTime }) => endTime.getTime());
   const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
+  const names = shifts.map(({ name }) => {
+    const split = name.split(" ");
+    return `${split[0]} ${split[split.length - 1][0]}`;
+  });
   const data = [
     {
       type: "bar",
-      mode: "text",
       x: durations,
       base: startTimes,
       marker: {
@@ -80,16 +84,55 @@ function createPlot(shifts) {
           width: 2,
         },
       },
-      text: shifts.map(({ name }) => `<b>${name}</b>`),
+      textposition: "inside",
+      text: names.map((name) => `<b>${name}</b>`),
+      insidetextanchor: "middle",
+      insidetextfont: {
+        size: 14,
+        family: "Arial",
+      },
+      constraintext: "none",
       hoverinfo: "text",
       hovertext: hoverText,
     },
   ];
 
-  //let chartHeight = $("#chart").offsetHeight;
-  let chartWidth = $("#chart").offsetWidth;
+
+  // Create start and end time annotations
+  const startTimeAnnotations = shifts.map(({ startTime }, i) => ({
+    x: startTime,
+    y: i,
+    xref: "x",
+    yref: "y",
+    text: `<b>${formatDate(startTime)}</b>`,
+    showarrow: false,
+    font: {
+      size: 13,
+      family: "Arial",
+    },
+    xanchor:
+      startTime.getHours() + startTime.getMinutes() / 60 < 8.25
+        ? "left"
+        : "right",
+  }));
+  const endTimeAnnotations = shifts.map(({ endTime }, i) => ({
+    x: endTime,
+    y: i,
+    xref: "x",
+    yref: "y",
+    text: `<b>${formatDate(endTime)}</b>`,
+    showarrow: false,
+    font: {
+      size: 13,
+      family: "Arial",
+    },
+    xanchor: "left",
+  }));
+
 
   // Set layout
+  //let chartHeight = $("#chart").offsetHeight;
+  let chartWidth = $("#chart").offsetWidth;
   const layout = {
     title: `<b>${titleCase(currentDay)} Schedule</b>`,
     width: chartWidth, //window.screen.availWidth * 0.89,
@@ -106,18 +149,24 @@ function createPlot(shifts) {
         dtick: 15 * 60 * 1000,
         showgrid: true,
       },
-      fixedrange: true,
+      autorange: false,
+      // Set range to 15 minutes before first shift and 15 minutes after last shift
+      range: [
+        new Date(Math.min(...startTimes) - 25 * 60 * 1000),
+        new Date(Math.max(...endTimes) + 25 * 60 * 1000),
+      ],
     },
     yaxis: {
       title: "<b>Position</b>",
       type: "category",
       tickmode: "array",
       automargin: true,
-      tickvals: shifts.map((_, i) => i),
+      tickvals: jobTitles.map((_, i) => i),
       ticktext: jobTitles,
       showgrid: true,
       fixedrange: true,
     },
+    annotations: [...startTimeAnnotations, ...endTimeAnnotations],
   };
 
   // Create chart
@@ -146,12 +195,14 @@ function getColor(val) {
   const rgbRange = [0, 255];
 
   // Map value to RGB
-  const r = Math.floor(map(val % 256, valRange, rgbRange) * RGB_MULT);
-  const g = Math.floor(
-    map(Math.floor(val / 256) % 256, valRange, rgbRange) * RGB_MULT
+  const r = Math.abs(Math.floor(map(val % 256, valRange, rgbRange) * RGB_MULT));
+  const g = Math.abs(
+    Math.floor(map(Math.floor(val / 256) % 256, valRange, rgbRange) * RGB_MULT)
   );
-  const b = Math.floor(
-    map(Math.floor(val / 256 ** 2) % 256, valRange, rgbRange) * RGB_MULT
+  const b = Math.abs(
+    Math.floor(
+      map(Math.floor(val / 256 ** 2) % 256, valRange, rgbRange) * RGB_MULT
+    )
   );
 
   // Convert to hex
@@ -177,30 +228,6 @@ function titleCase(str) {
     .split(" ")
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
-}
-
-// Generate 30 minute intervals between two times
-function generateIntervalRange(startTimeStr, endTimeStr) {
-  // Parse the input time strings into Date objects with a common date (e.g., 1970-01-01)
-  const commonDate = new Date();
-  const startTime = new Date(`${commonDate.toDateString()} ${startTimeStr}`);
-  const endTime = new Date(`${commonDate.toDateString()} ${endTimeStr}`);
-
-  // Check if the input times are valid
-  if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-    return [];
-  }
-
-  // Initialize an array to store the intervals
-  const intervalRange = [];
-
-  // Create intervals of 30 minutes until the end time is reached
-  while (startTime < endTime) {
-    intervalRange.push(new Date(startTime));
-    startTime.setMinutes(startTime.getMinutes() + 30);
-  }
-
-  return intervalRange;
 }
 
 // Format a date as "HH:MM AM/PM"
