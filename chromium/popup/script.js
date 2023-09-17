@@ -86,7 +86,7 @@ function createPlot(shifts) {
     },
   ];
 
-  let chartHeight = $("#chart").offsetHeight;
+  //let chartHeight = $("#chart").offsetHeight;
   let chartWidth = $("#chart").offsetWidth;
 
   // Set layout
