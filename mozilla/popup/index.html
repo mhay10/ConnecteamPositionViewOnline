@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Connecteam Position View</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <script src="jquery.min.js"></script>
+    <script src="plotly.min.js"></script>
+    <script src="script.js"></script>
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="schedules">
+      <button type="button" id="back" class="navigation"><div class="nav-text">Previous</div></button>
+      <div class="chart" id="chart"></div>
+      <button type="button" id="next" class="navigation"><div class="nav-text">Next</div></button>
+    </div>
+    <br />
+    <div class="footer-button"><button class="downloadButton" type="button" id="download-chart">Download Schedule as PNG</button></div>
+  </body>
+</html>
