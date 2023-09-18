@@ -10,6 +10,7 @@ const dayNames = [
 ];
 let currentDay = dayNames[new Date().getDay()];
 let days = {};
+let dateReference;
 
 $(async () => {
   // Get days from local storage
@@ -48,7 +49,7 @@ function getPrevDay() {
 
 function downloadPlot() {
   Plotly.downloadImage("chart", {
-    filename: `${currentDay}-schedule`,
+    filename: `${new Date(dateReference).toISOString().slice(0, 10)}-${currentDay}-schedule`,
     format: "png",
   });
 }
@@ -104,6 +105,9 @@ function createPlot(shifts) {
       hovertext: hoverText,
     },
   ];
+
+  dateReference = startTimes[0];
+  console.log(dateReference);
 
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;
