@@ -1,0 +1,20 @@
+Storage context
+	*ModeSet
+	debugModeSet
+	funnyModeSet
+
+Options Page js context
+	*ModeCheckbox
+	debugModeCheckbox.checked
+	funnyModeCheckbox.checked
+
+Options Page HTML context
+	*ModeElem
+	DebugModeElem
+	FunnyModeElem
+
+
+Action context
+	*Mode
+	debugMode
+	funnyMode

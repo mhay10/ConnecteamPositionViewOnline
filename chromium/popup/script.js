@@ -97,6 +97,7 @@ function createPlot(shifts) {
     },
   ];
 
+
   // Create start and end time annotations
   const startTimeAnnotations = shifts.map(({ startTime }, i) => ({
     x: startTime,
@@ -128,9 +129,14 @@ function createPlot(shifts) {
     xanchor: "left",
   }));
 
+
   // Set layout
+  //let chartHeight = $("#chart").offsetHeight;
+  let chartWidth = $("#chart").offsetWidth;
   const layout = {
     title: `<b>${titleCase(currentDay)} Schedule</b>`,
+    width: chartWidth, //window.screen.availWidth * 0.89,
+    height: window.screen.availHeight * 0.9,
     xaxis: {
       title: "<b>Time</b>",
       type: "date",

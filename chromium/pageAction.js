@@ -12,12 +12,27 @@ const observer = new MutationObserver(async (mutList) => {
   }
 });
 
+
+// Get user set options
+let debugMode;
+
+chrome.storage.sync.get(['debugModeSet'], function (result) {
+    debugMode = result.debugModeSet;
+
+    // Log settings
+    console.log("debugMode set to:");
+    console.log(debugMode);
+});
+
+
+
 // Inject when job scheduler is opened
 window.onhashchange = () => {
   const url = document.URL;
   if (url.match(/shiftscheduler/) != null)
     observer.observe(document, { childList: true, subtree: true });
 };
+
 
 // Check if the page is the correct one
 const url = document.URL;
@@ -127,7 +142,7 @@ async function getShifts() {
         courseId: "2881759",
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        timezone: "America/Denver",
+        timezone: "UTC",
         _spirit: getCookie("_spirit"),
       }),
       method: "POST",
