@@ -14,7 +14,7 @@ const observer = new MutationObserver(async (mutList) => {
 
 
 // Get user set options
-let debugMode;
+let debugMode; // not doing anything right now
 
 chrome.storage.sync.get(['debugModeSet'], function (result) {
     debugMode = result.debugModeSet;
@@ -153,7 +153,7 @@ async function getShifts() {
 
   // Check if the response is ok
   if (!res.ok) {
-    console.log("Error fetching shifts");
+    alert("Error fetching shifts");
     return;
   }
 
@@ -188,7 +188,7 @@ async function getJobsAndUsers() {
 
   // Check if the response is ok
   if (!res.ok) {
-    console.log("Error fetching job ids");
+    alert("Error fetching job ids");
     return;
   }
 

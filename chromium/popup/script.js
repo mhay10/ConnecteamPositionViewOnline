@@ -107,13 +107,12 @@ function createPlot(shifts) {
   ];
 
   dateReference = startTimes[0];
-  console.log(dateReference);
 
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;
   let chartWidth = $("#chart").offsetWidth;
   const layout = {
-    title: `<b>${titleCase(currentDay)} Schedule</b>`,
+    title: `<b>${titleCase(currentDay)} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
     width: chartWidth, //window.screen.availWidth * 0.89,
     height: window.screen.availHeight * 0.9,
     xaxis: {
