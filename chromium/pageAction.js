@@ -52,7 +52,7 @@ async function inject() {
 
     // Add the button to get the shifts
     const shiftsButton = document.createElement("button");
-    shiftsButton.innerHTML = "Get Shifts";
+    shiftsButton.innerHTML = "Position View";
     shiftsButton.classList = "connecteam-custom-btn";
     shiftsButton.onclick = createPositionView;
 
