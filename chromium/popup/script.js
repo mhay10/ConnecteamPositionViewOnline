@@ -25,6 +25,7 @@ $(async () => {
 
   $("#next").on("click", getNextDay);
   $("#back").on("click", getPrevDay);
+  $("#download-chart").on("click", downloadPlot);
 
   // Create chart of selected day
   createPlot(days[currentDay]);
@@ -43,6 +44,13 @@ function getPrevDay() {
       (dayNames.indexOf(currentDay) + dayNames.length - 1) % dayNames.length
     ];
   createPlot(days[currentDay]);
+}
+
+function downloadPlot() {
+  Plotly.downloadImage("chart", {
+    filename: `${currentDay}-schedule`,
+    format: "png",
+  });
 }
 
 function createPlot(shifts) {
@@ -97,39 +105,6 @@ function createPlot(shifts) {
     },
   ];
 
-
-  // Create start and end time annotations
-  const startTimeAnnotations = shifts.map(({ startTime }, i) => ({
-    x: startTime,
-    y: i,
-    xref: "x",
-    yref: "y",
-    text: `<b>${formatDate(startTime)}</b>`,
-    showarrow: false,
-    font: {
-      size: 13,
-      family: "Arial",
-    },
-    xanchor:
-      startTime.getHours() + startTime.getMinutes() / 60 < 8.25
-        ? "left"
-        : "right",
-  }));
-  const endTimeAnnotations = shifts.map(({ endTime }, i) => ({
-    x: endTime,
-    y: i,
-    xref: "x",
-    yref: "y",
-    text: `<b>${formatDate(endTime)}</b>`,
-    showarrow: false,
-    font: {
-      size: 13,
-      family: "Arial",
-    },
-    xanchor: "left",
-  }));
-
-
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;
   let chartWidth = $("#chart").offsetWidth;
@@ -155,6 +130,7 @@ function createPlot(shifts) {
         new Date(Math.min(...startTimes) - 25 * 60 * 1000),
         new Date(Math.max(...endTimes) + 25 * 60 * 1000),
       ],
+      fixedrange: true,
     },
     yaxis: {
       title: "<b>Position</b>",
@@ -166,7 +142,6 @@ function createPlot(shifts) {
       showgrid: true,
       fixedrange: true,
     },
-    annotations: [...startTimeAnnotations, ...endTimeAnnotations],
   };
 
   // Create chart
