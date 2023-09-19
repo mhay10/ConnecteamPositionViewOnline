@@ -1,3 +1,26 @@
+/////////////////////////////
+// Operational flags
+//    Optional flags that modify script behavior
+//    These are set by an options page
+/////////////////////////////
+
+// Get user set options
+let debugMode; // not doing anything right now
+let tabbedMode;
+
+chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
+    debugMode = result.debugModeSet;
+    tabbedMode = result.tabbedModeSet;
+
+    // Log settings
+    console.log("debugMode set to:");
+    console.log(debugMode);
+
+    console.log("tabbedMode set to");
+    console.log(tabbedMode);
+
+});
+
 window.height = window.screen.availHeight;
 window.width = window.screen.availWidth;
 
@@ -111,13 +134,22 @@ function createPlot(shifts) {
 
   dateReference = startTimes[0];
 
+  // tabbedMode height adjustments
+  let setHeight;
+  if (tabbedMode) {
+    setHeight = window.screen.availHeight * 0.81;
+  }
+  else {
+    setHeight = window.screen.availHeight * 0.885;
+  }
+
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;
   let chartWidth = $("#chart").offsetWidth;
   const layout = {
     title: `<b>${titleCase(currentDay)} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
     width: chartWidth, //window.screen.availWidth * 0.89,
-    height: window.screen.availHeight * 0.84,
+    height: setHeight,
     xaxis: {
       title: "<b>Time</b>",
       type: "date",

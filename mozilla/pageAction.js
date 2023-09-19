@@ -1,65 +1,130 @@
-// Observer to inject the script when the page is loaded
-const observer = new MutationObserver(async (mutList) => {
-  for (const mut of mutList) {
-    if (mut.type === "childList" && mut.addedNodes.length > 0) {
-      const container = document.getElementsByClassName("buttons")[0];
-      if (container && !injected) {
-        inject();
-        injected = true;
-        observer.disconnect();
-      }
-    }
-  }
-});
 
+/*
+           ______   ______   .__   __. .__   __.  _______   ______ .___________. _______     ___      .___  ___.              
+          /      | /  __  \  |  \ |  | |  \ |  | |   ____| /      ||           ||   ____|   /   \     |   \/   |              
+         |  ,----'|  |  |  | |   \|  | |   \|  | |  |__   |  ,----'`---|  |----`|  |__     /  ^  \    |  \  /  |              
+         |  |     |  |  |  | |  . `  | |  . `  | |   __|  |  |         |  |     |   __|   /  /_\  \   |  |\/|  |              
+         |  `----.|  `--'  | |  |\   | |  |\   | |  |____ |  `----.    |  |     |  |____ /  _____  \  |  |  |  |              
+          \______| \______/  |__| \__| |__| \__| |_______| \______|    |__|     |_______/__/     \__\ |__|  |__|              
+                                                                                                                              
+.______     ______        _______. __  .___________. __    ______   .__   __.    ____    ____  __   ___________    __    ____ 
+|   _  \   /  __  \      /       ||  | |           ||  |  /  __  \  |  \ |  |    \   \  /   / |  | |   ____\   \  /  \  /   / 
+|  |_)  | |  |  |  |    |   (----`|  | `---|  |----`|  | |  |  |  | |   \|  |     \   \/   /  |  | |  |__   \   \/    \/   /  
+|   ___/  |  |  |  |     \   \    |  |     |  |     |  | |  |  |  | |  . `  |      \      /   |  | |   __|   \            /   
+|  |      |  `--'  | .----)   |   |  |     |  |     |  | |  `--'  | |  |\   |       \    /    |  | |  |____   \    /\    /    
+| _|       \______/  |_______/    |__|     |__|     |__|  \______/  |__| \__|        \__/     |__| |_______|   \__/  \__/     
+
+This is the primary content script that handles the creation of shift data csv files.
+Original Solution:  Max Hay (mhay10)
+Extension & Other Days: David Jones (aclamendo)
+*/
+
+
+
+/////////////////////////////
+// Operational flags
+//    Optional flags that modify script behavior
+//    These are set by an options page
+/////////////////////////////
 
 // Get user set options
 let debugMode; // not doing anything right now
+let tabbedMode;
 
-browser.storage.sync.get(['debugModeSet'], function (result) {
+chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
     debugMode = result.debugModeSet;
+    tabbedMode = result.tabbedModeSet;
 
     // Log settings
     console.log("debugMode set to:");
     console.log(debugMode);
+
+    console.log("tabbedMode set to");
+    console.log(tabbedMode);
+
 });
 
 
 
-// Inject when job scheduler is opened
-window.onhashchange = () => {
-  const url = document.URL;
-  if (url.match(/shiftscheduler/) != null)
-    observer.observe(document, { childList: true, subtree: true });
-};
-
-
-// Check if the page is the correct one
-const url = document.URL;
-if (url.match(/shiftscheduler/) != null)
-  observer.observe(document, { childList: true, subtree: true });
-
+/////////////////////////////
+// This function ensures that the rest of the content script will only load when applicable
+// Prevents the script from doing anything further if on the wrong connecteam page
+// Prevents the script from doing anything further if the element where the buttons are placed has not loaded
+/////////////////////////////
 // Makes sure the script is injected only once
-let injected = false;
+let runTimes = 0;
+const maxRuns = 1;
+
+
+function actionTiming() {
+
+  console.log("Watching connecteam SPA for schedules...");
+
+  // Only run if document.url indicates shift scheduler:
+  let url = document.URL;
+  console.log(url);
+
+  // observer waits for the button placement element to fully load before running inject
+  const observer = new MutationObserver(function(mutationsList) {
+    for (let mutation of mutationsList) {
+      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+
+        // Only continue of the destination div is present
+        const container = document.getElementsByClassName("buttons")[0];
+        if (container) {
+          inject();
+          observer.disconnect(); // stop the observer after success.
+        }
+      }
+    }
+  })
+
+  // Check if page is valid immediately
+  if (url.match(/shiftscheduler/) != null) {
+    console.log("Scheduling page immediately located, waiting for element...");
+
+    // start observer and wait
+    observer.observe(document, { childList: true, subtree: true });
+  }
+
+  // Check url after page changes
+  addEventListener("hashchange", function() {
+    url = document.URL;
+
+    if (url.match(/shiftscheduler/) != null) {
+      console.log("Scheduling page located after load, waiting for element...");
+      runTimes = 0;
+
+      // start observer and wait
+      observer.observe(document, { childList: true, subtree: true });
+    }
+  });
+}
+
 
 async function inject() {
-  console.log("Injecting");
+  
+  if (runTimes < maxRuns) {
+    runTimes++;
 
-  // Add buttons
-  const buttons = document.getElementsByClassName("buttons")[0];
-  if (buttons) {
-    console.log("Adding buttons");
+    console.log("Injecting");
 
-    // Add the button to get the shifts
-    const shiftsButton = document.createElement("button");
-    shiftsButton.innerHTML = "Position View";
-    shiftsButton.classList = "connecteam-custom-btn";
-    shiftsButton.onclick = createPositionView;
+    // Add buttons
+    const buttons = document.getElementsByClassName("buttons")[0];
+    if (buttons) {
+      console.log("Adding buttons");
 
-    // Add button to the page
-    buttons.appendChild(shiftsButton);
+      // Add the button to get the shifts
+      const shiftsButton = document.createElement("button");
+      shiftsButton.innerHTML = "Position View";
+      shiftsButton.classList = "connecteam-custom-btn";
+      shiftsButton.onclick = createPositionView;
 
-    console.log("Buttons added");
+      // Add button to the page
+      buttons.appendChild(shiftsButton);
+
+      console.log("Buttons added");
+    }
   }
 }
 
@@ -230,3 +295,6 @@ function getDateRange() {
   // Return the dates
   return { startDate, endDate };
 }
+
+
+actionTiming();
