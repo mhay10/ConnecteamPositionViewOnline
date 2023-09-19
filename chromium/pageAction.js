@@ -154,13 +154,14 @@ async function createPositionView() {
     return {
       jobTitle: job.title,
       name: `${user.firstname} ${user.lastname}`,
-      startTime: new Date(startTime * 1000).toISOString(),
-      endTime: new Date(endTime * 1000).toISOString(),
+      startTime: new Date(startTime * 1000).toLocalISO(),
+      endTime: new Date(endTime * 1000).toLocalISO(),
     };
   });
 
   // Sort shifts into days
   const days = {};
+  days.keys = [];
   const dayNames = [
     "sunday",
     "monday",
@@ -171,15 +172,30 @@ async function createPositionView() {
     "saturday",
   ];
   for (const shift of assignedShifts) {
-    // Get the day of the shift
-    const day = dayNames[new Date(shift.startTime).getDay()];
+    // // Get the day of the shift
+    // const day = dayNames[new Date(shift.startTime).getDay()];
 
-    // Make array of shifts for the day if it doesn't exist
-    if (!days[day]) days[day] = [];
+    // // Make array of shifts for the day if it doesn't exist
+    // if (!days[day]) days[day] = [];
 
-    // Add shift to the day
+    // // Add shift to the day
+    // days[day].push(shift);
+
+    // Get day of shift
+    const day = new Date(shift.startTime).toLocalISO().slice(0, 10);
+
+    // Ensure key for day exists
+    if (!days[day]) {
+      days[day] = [];
+      days.keys.push(day);
+    }
+
+    // Add shift to that day
     days[day].push(shift);
   }
+
+  days.keys.sort();
+  console.log(days);
 
   localStorage.setItem("days", JSON.stringify(days));
   openSchedulePopup(days);
@@ -294,9 +310,9 @@ function getDateRange() {
   const startDate = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate() - today.getDay() - 1
+    today.getDate() - today.getDay() - 7
   );
-  const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const endDate = new Date(startDate.getTime() + 28 * 24 * 60 * 60 * 1000);
 
   // Return the dates
   return { startDate, endDate };
@@ -304,3 +320,23 @@ function getDateRange() {
 
 
 actionTiming();
+
+
+
+
+
+// New ISO function that converts all stored dates and times to local time zone
+Date.prototype.toLocalISO = function () {
+  const year = this.getFullYear();
+  const month = String(this.getMonth() + 1).padStart(2, '0');
+  const day = String(this.getDate()).padStart(2, '0');
+  const hours = String(this.getHours()).padStart(2, '0');
+  const minutes = String(this.getMinutes()).padStart(2, '0');
+  const seconds = String(this.getSeconds()).padStart(2, '0');
+  const milliseconds = String(this.getMilliseconds()).padStart(3, '0');
+  const offsetMinutes = this.getTimezoneOffset();
+  const offsetHours = Math.abs(offsetMinutes / 60);
+  const offsetSign = offsetMinutes < 0 ? '+' : '-';
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(Math.abs(offsetMinutes % 60)).padStart(2, '0')}`;
+}

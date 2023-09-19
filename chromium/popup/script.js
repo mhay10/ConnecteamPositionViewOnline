@@ -32,14 +32,14 @@ const dayNames = [
   "friday",
   "saturday",
 ];
-let currentDay = dayNames[new Date().getDay()];
+let currentDay = new Date().toISOString().slice(0, 10);
 let days = {};
 let dateReference;
 
 $(async () => {
   // Get days from local storage
   days = (await chrome.storage.local.get(["days"])).days;
-  for (const day of Object.keys(days)) {
+  for (const day of days.keys) {
     // Convert start and end times to Date objects
     const shifts = days[day];
     for (const shift of shifts) {
@@ -58,22 +58,21 @@ $(async () => {
 
 // Get next day
 function getNextDay() {
-  currentDay = dayNames[(dayNames.indexOf(currentDay) + 1) % dayNames.length];
+  //currentDay = dayNames[(dayNames.indexOf(currentDay) + 1) % dayNames.length];
+  currentDay = days.keys[(days.keys.indexOf(currentDay) + 1) % days.keys.length];
   createPlot(days[currentDay]);
 }
 
 // Get previous day
 function getPrevDay() {
-  currentDay =
-    dayNames[
-      (dayNames.indexOf(currentDay) + dayNames.length - 1) % dayNames.length
-    ];
+  //currentDay = dayNames[(dayNames.indexOf(currentDay) + dayNames.length - 1) % dayNames.length];
+  currentDay = days.keys[(days.keys.indexOf(currentDay) + days.keys.length - 1) % days.keys.length];
   createPlot(days[currentDay]);
 }
 
 function downloadPlot() {
   Plotly.downloadImage("chart", {
-    filename: `${new Date(dateReference).toISOString().slice(0, 10)}-${currentDay}-schedule`,
+    filename: `${new Date(dateReference).toISOString().slice(0, 10)}-${dayNames[new Date(currentDay+'T00:00:00.000').getDay()]}-schedule`,
     format: "png",
   });
 }
@@ -141,11 +140,15 @@ function createPlot(shifts) {
     setHeight = window.screen.availHeight * 0.9;
   }
 
+  console.log(currentDay);
+  console.log(currentDay+'T00:00:00.000');
+  console.log(new Date(currentDay+'T00:00:00.000'));
+
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;
   let chartWidth = $("#chart").offsetWidth;
   const layout = {
-    title: `<b>${titleCase(currentDay)} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
+    title: `<b>${titleCase(dayNames[new Date(currentDay+'T00:00:00.000').getDay()])} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
     width: chartWidth, //window.screen.availWidth * 0.89,
     height: setHeight,
     xaxis: {
