@@ -13,23 +13,22 @@
   ],
   "content_scripts": [
     {
-      "matches": [
-        "https://*.connecteam.com/*"
-      ],
-      "js": [
-        "pageAction.js"
-      ],
+      "matches": ["https://*.connecteam.com/*"],
+      "js": ["pageAction.js"],
       "run_at": "document_end"
     }
   ],
-  "web_accessible_resources": [
-    "popup/index.html"
-  ],
+  "web_accessible_resources": ["popup/index.html"],
   "background": {
     "scripts": ["background.js"]
   },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "connecteampositionviewonline@github.com"
+    }
   }
 }

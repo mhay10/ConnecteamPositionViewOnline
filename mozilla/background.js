@@ -1,10 +1,11 @@
 browser.runtime.onMessage.addListener((req, sender, sendRes) => {
-  
   // Popup handling
   if (sender.tab.url.match(/shiftscheduler/) != null) {
-    browser.tabs.create({
+    browser.windows.create({
       url: browser.runtime.getURL("popup/index.html"),
-      index: 0,
+      type: "popup",
+      width: window.screen.availWidth,
+      height: window.screen.availHeight,
     });
   }
 
@@ -21,5 +22,4 @@ browser.runtime.onMessage.addListener((req, sender, sendRes) => {
       }
     });
   }
-
 });
