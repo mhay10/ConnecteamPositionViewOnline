@@ -30,5 +30,8 @@
     "gecko": {
       "id": "connecteampositionviewonline@github.com"
     }
+  },
+  "browser_action": {
+    "default_popup": "options.html"
   }
 }
