@@ -4,11 +4,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Store the necessary elements on the form page
     const form = document.querySelector('form');
     const debugModeCheckbox = document.getElementById('DebugModeElem');
+    const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
 
     // Load the current setting from Chrome Storage and update the field state
-    chrome.storage.sync.get(['debugModeSet'], function (result) {
+    chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
         // Debugmode
         debugModeCheckbox.checked = result.debugModeSet;
+
+        // Tabbed
+        tabbedModeCheckbox.checked = result.tabbedModeSet;
 
     });
 
@@ -20,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Store the updated setting in Chrome Storage
         chrome.storage.sync.set({
             debugModeSet: debugModeCheckbox.checked,
+            tabbedModeSet: tabbedModeCheckbox.checked
         });
 
         // Tell the background script to reload the connecteam page

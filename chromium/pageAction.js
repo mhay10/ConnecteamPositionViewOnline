@@ -28,13 +28,19 @@ Extension & Other Days: David Jones (aclamendo)
 
 // Get user set options
 let debugMode; // not doing anything right now
+let tabbedMode;
 
-chrome.storage.sync.get(['debugModeSet'], function (result) {
+chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
     debugMode = result.debugModeSet;
+    tabbedMode = result.tabbedModeSet;
 
     // Log settings
     console.log("debugMode set to:");
     console.log(debugMode);
+
+    console.log("tabbedMode set to");
+    console.log(tabbedMode);
+
 });
 
 
