@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (funyModeCheckbox.checked) {
             document.body.setAttribute("style", "background-image: url(https://c.tenor.com/i-6ik9tSTk4AAAAC/fish-spin.gif);")
             let sound = new Audio("https://drive.google.com/uc?id=1Bw09LUjSOLB3CZtdpOBY5DpGfrP0an_U&export=download");
+            sound.loop = true;
             document.body.appendChild(sound);
             sound.play();
         }
