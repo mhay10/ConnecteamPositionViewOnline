@@ -6,20 +6,43 @@
         <script src="options.js">
         
         </script>
+
+        <link rel="stylesheet" href="options.css"/>
     </head>
     <body>
-        <h1>Connecteam Position View Options</h1>
+        <div class="top-bar">
+            <h1>Connecteam Position View Options</h1>
+        </div>
         <form>
 
             <!-- All Settings -->
-            <label for="DebugMode">Debug Mode:</label>
-            <input type="checkbox" id="DebugModeElem"><br><br>
+            
+            <div>
+                <label class="switch">
+                    <input class="ctm-input" type="checkbox" id="TabbedModeElem">
+                    <span class="slider round"></span>
+                </label>
+                <label for="TabbedMode">Tabbed Mode</label><br><br>
+            </div>
 
-            <label for="TabbedMode">Open position view in a tab:</label>
-            <input type="checkbox" id="TabbedModeElem"><br><br>
+            <div>
+                <label class="switch">
+                    <input class="ctm-input" type="checkbox" id="DebugModeElem">
+                    <span class="slider round"></span>
+                </label>
+                <label for="DebugMode">Debug Mode</label><br><br>
+            </div>
+
+            <div>
+                <label class="switch">
+                    <input class="ctm-input" type="checkbox" id="FunyModeElem">
+                    <span class="slider round"></span>
+                </label>
+                <label for="FunyMode">Funny Mode</label><br><br>
+            </div>
 
             <div class="save-area">
-                <input type="submit" value="Save" id="SaveButtonElem">
+                <input class="ctm-button" type="submit" value="Save" id="SaveButtonElem">
             </div>
         </form>
     </body>

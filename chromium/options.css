@@ -1,0 +1,119 @@
+/*@import url(https://app.connecteam.com/app.min.css) */
+html {
+	min-height: 150px !important;
+	min-width: 350px !important;
+}
+
+body *, html * {
+	font-family: Open Sans Hebrew,sans-serif;
+}
+
+body, html {
+	color: #3f4648;
+    font-size: 14px;
+    line-height: normal;
+    background-color: #fcfcfc;
+    overflow: hidden;
+}
+
+label {
+	color: #3f4648;
+    font-size: 15px;
+}
+
+.ctm-button {
+	height: 40px;
+    font-size: 15px;
+    position: relative;
+    text-align: center;
+    padding: 0 16px;
+    line-height: 0;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 20px;
+    color: #2998ff;
+    display: flex;
+    align-items: center;
+}
+
+.ctm-button:hover:enabled {
+  border: 1px solid #44a6ff;
+}
+
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  top: 0px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 13px;
+  width: 13px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background: #64bd63;
+  border-color: #64bd63;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(13px);
+  -ms-transform: translateX(13px);
+  transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 17px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.save-message {
+	height: 26px;
+    border-radius: 12.5px;
+    background-image: linear-gradient(252deg,#67aefa,#51d5ec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    color: #fff;
+}
