@@ -23,7 +23,7 @@ browser.runtime.onMessage.addListener((req, sender, sendRes) => {
   });
 
   // Popup handling
-  if (sender.tab.url.match(/shiftscheduler/) != null) {
+  if (req.popup) {
     if (tabbedMode) {
       browser.tabs.create({
         url: browser.runtime.getURL("popup/index.html"),

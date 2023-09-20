@@ -28,7 +28,7 @@ Extension & Other Days: David Jones (aclamendo)
 let debugMode; // not doing anything right now
 let tabbedMode;
 
-chrome.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
+browser.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
   debugMode = result.debugModeSet;
   tabbedMode = result.tabbedModeSet;
 
@@ -137,26 +137,42 @@ async function createPositionView() {
     return {
       jobTitle: job.title,
       name: `${user.firstname} ${user.lastname}`,
-      startTime: new Date(startTime * 1000).toISOString(),
-      endTime: new Date(endTime * 1000).toISOString(),
+      startTime: new Date(startTime * 1000).toLocalISO(),
+      endTime: new Date(endTime * 1000).toLocalISO(),
     };
   });
 
   // Sort shifts into days
-  const days = { keys: [] };
+  const days = {};
+  days.keys = [];
+  const dayNames = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
   for (const shift of assignedShifts) {
-    const day = new Date(shift.startTime).toISOString().slice(0, 10);
+
+    // Get day of shift
+    const day = new Date(shift.startTime).toLocalISO().slice(0, 10);
+
+    // Ensure key for day exists
     if (!days[day]) {
       days[day] = [];
-      days["keys"].push(day);
+      days.keys.push(day);
     }
+
+    // Add shift to that day
     days[day].push(shift);
   }
 
-  // Sort days[keys] by date
-  days["keys"].sort((a, b) => a.localeCompare(b));
+  days.keys.sort();
+  if (debugMode) console.log(days);
 
-  console.log(days);
+  localStorage.setItem("days", JSON.stringify(days));
 
   openSchedulePopup(days);
 }
@@ -164,7 +180,7 @@ async function createPositionView() {
 function openSchedulePopup(days) {
   console.log("Opening schedule popup");
   browser.storage.local.set({ days });
-  browser.runtime.sendMessage({});
+  browser.runtime.sendMessage({popup: true});
 }
 
 async function getShifts() {
@@ -270,12 +286,31 @@ function getDateRange() {
   const startDate = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate() - today.getDay() - 1
+    today.getDate() - today.getDay() - 7
   );
-  const endDate = new Date(startDate.getTime() + 16 * 24 * 60 * 60 * 1000);
+
+  const endDate = new Date(startDate.getTime() + 28 * 24 * 60 * 60 * 1000);
 
   // Return the dates
   return { startDate, endDate };
 }
 
+
+// New ISO function that converts all stored dates and times to local time zone
+Date.prototype.toLocalISO = function () {
+  const year = this.getFullYear();
+  const month = String(this.getMonth() + 1).padStart(2, '0');
+  const day = String(this.getDate()).padStart(2, '0');
+  const hours = String(this.getHours()).padStart(2, '0');
+  const minutes = String(this.getMinutes()).padStart(2, '0');
+  const seconds = String(this.getSeconds()).padStart(2, '0');
+  const milliseconds = String(this.getMilliseconds()).padStart(3, '0');
+  const offsetMinutes = this.getTimezoneOffset();
+  const offsetHours = Math.abs(offsetMinutes / 60);
+  const offsetSign = offsetMinutes < 0 ? '+' : '-';
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(Math.abs(offsetMinutes % 60)).padStart(2, '0')}`;
+}
+
 actionTiming();
+

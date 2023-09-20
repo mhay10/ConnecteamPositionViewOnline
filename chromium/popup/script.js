@@ -48,17 +48,19 @@ const dayNames = [
   "friday",
   "saturday",
 ];
-let currentDay = new Date().toFormattedDate();
+
+let currentDay = new Date().toISOString().slice(0, 10);
 let days = {};
+
+let dateReference;
 
 // Run once document is loaded
 $(async () => {
   // Get days from local storage
-  days = (await browser.storage.local.get(["days"])).days;
+  days = (await chrome.storage.local.get(["days"])).days;
+  for (const day of days.keys) {
+    // Convert start and end times to Date objects
 
-  // Convert start and end times to Date objects and keep track of incorrect shifts
-  let incorrectShifts = [];
-  for (const day of Object.keys(days).filter((day) => day !== "keys")) {
     const shifts = days[day];
     for (let i = 0; i < shifts.length; i++) {
       const shift = shifts[i];
@@ -70,19 +72,6 @@ $(async () => {
     }
   }
 
-  // Move incorrect shifts to correct day
-  for (const { shift, day } of incorrectShifts) {
-    const index = days[day].findIndex(
-      ({ name, jobTitle, startTime, endTime }) =>
-        shift.name === name &&
-        shift.jobTitle === jobTitle &&
-        shift.startTime.getTime() === startTime.getTime() &&
-        shift.endTime.getTime() === endTime.getTime()
-    );
-    const oldShift = days[day].splice(index, 1)[0];
-    const newDay = shift.startTime.toFormattedDate();
-    days[newDay].push(oldShift);
-  }
 
   $("#next").on("click", getNextDay);
   $("#back").on("click", getPrevDay);
@@ -94,25 +83,19 @@ $(async () => {
 
 // Get next day
 function getNextDay() {
-  currentDay =
-    days.keys[(days.keys.indexOf(currentDay) + 1) % days.keys.length];
+  currentDay = days.keys[(days.keys.indexOf(currentDay) + 1) % days.keys.length];
   createPlot(days[currentDay]);
 }
 
 // Get previous day
 function getPrevDay() {
-  currentDay =
-    days.keys[
-      (days.keys.indexOf(currentDay) + days.keys.length - 1) % days.keys.length
-    ];
+  currentDay = days.keys[(days.keys.indexOf(currentDay) + days.keys.length - 1) % days.keys.length];
   createPlot(days[currentDay]);
 }
 
 function downloadPlot() {
   Plotly.downloadImage("chart", {
-    filename: `${currentDay}_${
-      dayNames[getDate(currentDay).getDay()]
-    }_schedule`,
+    filename: `${new Date(dateReference).toISOString().slice(0, 10)}-${dayNames[new Date(currentDay+'T00:00:00.000').getDay()]}-schedule`,
     format: "png",
   });
 }
@@ -167,6 +150,8 @@ function createPlot(shifts) {
     },
   ];
 
+  dateReference = startTimes[0];
+
   // tabbedMode height adjustments
   let setHeight;
   if (tabbedMode) {
@@ -180,7 +165,7 @@ function createPlot(shifts) {
   let chartWidth = $("#chart").offsetWidth;
   const dayName = dayNames[getDate(currentDay).getDay()];
   const layout = {
-    title: `<b>${titleCase(dayName)} Schedule (${currentDay})</b>`,
+    title: `<b>${titleCase(dayNames[new Date(currentDay+'T00:00:00.000').getDay()])} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
     width: chartWidth, //window.screen.availWidth * 0.89,
     height: setHeight,
     xaxis: {
