@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     const debugModeCheckbox = document.getElementById('DebugModeElem');
     const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
+    const funyModeCheckbox = document.getElementById('FunyModeElem');
 
     // Load the current setting from Chrome Storage and update the field state
     chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
@@ -27,13 +28,19 @@ document.addEventListener('DOMContentLoaded', function () {
             tabbedModeSet: tabbedModeCheckbox.checked
         });
 
+
+        if (funyModeCheckbox.checked) {
+            document.body.setAttribute("style", "background-image: url(https://c.tenor.com/i-6ik9tSTk4AAAAC/fish-spin.gif);")
+        }
+
         // Tell the background script to reload the connecteam page
         chrome.runtime.sendMessage({ reloadTabs: true });
         
         // Put new element on the page indicating the settings are saved
-        saveButton = document.getElementsByClassName("save-area")[0];
+        topBar = document.getElementsByClassName("top-bar")[0];
         let saveText = document.createElement("p");
         saveText.innerText = "Settings Saved!";
-        saveButton.appendChild(saveText);
+        saveText.classList.add("save-message");
+        topBar.prepend(saveText);
     });
 });

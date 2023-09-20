@@ -8,21 +8,38 @@
 let debugMode; // not doing anything right now
 let tabbedMode;
 
-chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
-    debugMode = result.debugModeSet;
-    tabbedMode = result.tabbedModeSet;
+browser.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
+  debugMode = result.debugModeSet;
+  tabbedMode = result.tabbedModeSet;
 
-    // Log settings
-    console.log("debugMode set to:");
-    console.log(debugMode);
+  // Log settings
+  console.log("debugMode set to:");
+  console.log(debugMode);
 
-    console.log("tabbedMode set to");
-    console.log(tabbedMode);
-
+  console.log("tabbedMode set to");
+  console.log(tabbedMode);
 });
 
 window.height = window.screen.availHeight;
 window.width = window.screen.availWidth;
+
+// Date formatting
+Date.prototype.toFormattedDate = function () {
+  const year = this.getFullYear();
+  const month = (this.getMonth() + 1).toString().padStart(2, "0");
+  const day = this.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+Date.prototype.toFormattedTime = function () {
+  const hours = this.getHours();
+  const minutes = this.getMinutes().toString().padStart(2, "0");
+  const isAM = hours < 12;
+  const hour = hours % 12 || 12;
+
+  return `${hour}:${minutes} ${isAM ? "AM" : "PM"}`;
+};
 
 // Keep track of which day is selected
 const dayNames = [
@@ -34,20 +51,40 @@ const dayNames = [
   "friday",
   "saturday",
 ];
+
 let currentDay = new Date().toISOString().slice(0, 10);
 let days = {};
-let dateReference;
 
+// Run once document is loaded
 $(async () => {
   // Get days from local storage
   days = (await browser.storage.local.get(["days"])).days;
   for (const day of days.keys) {
     // Convert start and end times to Date objects
+
     const shifts = days[day];
-    for (const shift of shifts) {
+    for (let i = 0; i < shifts.length; i++) {
+      const shift = shifts[i];
       shift.startTime = new Date(shift.startTime);
       shift.endTime = new Date(shift.endTime);
+
+      if (shift.startTime.toFormattedDate() !== day)
+        incorrectShifts.push({ shift, day });
     }
+  }
+
+  // Move incorrect shifts to correct day
+  for (const { shift, day } of incorrectShifts) {
+    const index = days[day].findIndex(
+      ({ name, jobTitle, startTime, endTime }) =>
+        shift.name === name &&
+        shift.jobTitle === jobTitle &&
+        shift.startTime.getTime() === startTime.getTime() &&
+        shift.endTime.getTime() === endTime.getTime()
+    );
+    const oldShift = days[day].splice(index, 1)[0];
+    const newDay = shift.startTime.toFormattedDate();
+    days[newDay].push(oldShift);
   }
 
   $("#next").on("click", getNextDay);
@@ -87,10 +124,8 @@ function createPlot(shifts) {
   );
 
   // Create hover popup text
-  const hoverText = shifts.map(({ name, jobTitle, startTime, endTime }) => {
-    return `<b>${jobTitle}</b><br>${formatDate(startTime)} - ${formatDate(
-      endTime
-    )}`;
+  const hoverText = shifts.map(({ jobTitle, startTime, endTime }) => {
+    return `<b>${jobTitle}</b><br>${startTime.toFormattedTime()} - ${endTime.toFormattedTime()}`;
   });
 
   // Set chart data
@@ -129,20 +164,18 @@ function createPlot(shifts) {
     },
   ];
 
-  dateReference = startTimes[0];
-
   // tabbedMode height adjustments
   let setHeight;
   if (tabbedMode) {
     setHeight = window.screen.availHeight * 0.81;
-  }
-  else {
+  } else {
     setHeight = window.screen.availHeight * 0.885;
   }
 
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;
   let chartWidth = $("#chart").offsetWidth;
+  const dayName = dayNames[getDate(currentDay).getDay()];
   const layout = {
     title: `<b>${titleCase(dayNames[new Date(currentDay+'T00:00:00.000').getDay()])} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
     width: chartWidth, //window.screen.availWidth * 0.89,
@@ -240,12 +273,7 @@ function titleCase(str) {
     .join(" ");
 }
 
-// Format a date as "HH:MM AM/PM"
-function formatDate(date) {
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const isAM = hours < 12;
-  const hour = hours % 12 || 12;
-
-  return `${hour}:${minutes.toString().padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
+function getDate(str) {
+  const [year, month, day] = str.split("-");
+  return new Date(year, month - 1, day);
 }

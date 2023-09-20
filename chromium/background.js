@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((req, sender, sendRes) => {
 
 
   // Popup handling
-  if (sender.tab.url.match(/shiftscheduler/) != null) {
+  if (req.popup) {
     if (tabbedMode) {
       chrome.tabs.create({
         url: chrome.runtime.getURL("popup/index.html"),
