@@ -18,8 +18,6 @@ Original Solution:  Max Hay (mhay10)
 Extension & Other Days: David Jones (aclamendo)
 */
 
-
-
 /////////////////////////////
 // Operational flags
 //    Optional flags that modify script behavior
@@ -30,20 +28,17 @@ Extension & Other Days: David Jones (aclamendo)
 let debugMode; // not doing anything right now
 let tabbedMode;
 
-chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
-    debugMode = result.debugModeSet;
-    tabbedMode = result.tabbedModeSet;
+chrome.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
+  debugMode = result.debugModeSet;
+  tabbedMode = result.tabbedModeSet;
 
-    // Log settings
-    console.log("debugMode set to:");
-    console.log(debugMode);
+  // Log settings
+  console.log("debugMode set to:");
+  console.log(debugMode);
 
-    console.log("tabbedMode set to");
-    console.log(tabbedMode);
-
+  console.log("tabbedMode set to");
+  console.log(tabbedMode);
 });
-
-
 
 /////////////////////////////
 // This function ensures that the rest of the content script will only load when applicable
@@ -54,9 +49,7 @@ chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
 let runTimes = 0;
 const maxRuns = 1;
 
-
 function actionTiming() {
-
   console.log("Watching connecteam SPA for schedules...");
 
   // Only run if document.url indicates shift scheduler:
@@ -64,10 +57,9 @@ function actionTiming() {
   console.log(url);
 
   // observer waits for the button placement element to fully load before running inject
-  const observer = new MutationObserver(function(mutationsList) {
+  const observer = new MutationObserver(function (mutationsList) {
     for (let mutation of mutationsList) {
-      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         // Only continue of the destination div is present
         const container = document.getElementsByClassName("buttons")[0];
         if (container) {
@@ -76,7 +68,7 @@ function actionTiming() {
         }
       }
     }
-  })
+  });
 
   // Check if page is valid immediately
   if (url.match(/shiftscheduler/) != null) {
@@ -87,7 +79,7 @@ function actionTiming() {
   }
 
   // Check url after page changes
-  window.onhashchange = function() {
+  addEventListener("hashchange", function () {
     url = document.URL;
 
     if (url.match(/shiftscheduler/) != null) {
@@ -97,21 +89,13 @@ function actionTiming() {
       // start observer and wait
       observer.observe(document, { childList: true, subtree: true });
     }
-  }
+  });
 }
 
-
-
-/////////////////////////////
-// Primary behavior
-/////////////////////////////
-
-
-
 async function inject() {
-  
   if (runTimes < maxRuns) {
     runTimes++;
+
     console.log("Injecting");
 
     // Add buttons
@@ -135,7 +119,6 @@ async function inject() {
 
 // Main function to create the position view
 async function createPositionView() {
-  
   // Get the shifts
   const shifts = await getShifts();
   const { jobs, users } = await getJobsAndUsers();
@@ -160,35 +143,26 @@ async function createPositionView() {
   });
 
   // Sort shifts into days
-  const days = {};
-  const dayNames = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ];
+  const days = { keys: [] };
   for (const shift of assignedShifts) {
-    // Get the day of the shift
-    const day = dayNames[new Date(shift.startTime).getDay()];
-
-    // Make array of shifts for the day if it doesn't exist
-    if (!days[day]) days[day] = [];
-
-    // Add shift to the day
+    const day = new Date(shift.startTime).toISOString().slice(0, 10);
+    if (!days[day]) {
+      days[day] = [];
+      days["keys"].push(day);
+    }
     days[day].push(shift);
   }
 
-  localStorage.setItem("days", JSON.stringify(days));
+  // Sort days[keys] by date
+  days["keys"].sort((a, b) => a.localeCompare(b));
+
   openSchedulePopup(days);
 }
 
 function openSchedulePopup(days) {
   console.log("Opening schedule popup");
   chrome.storage.local.set({ days });
-  chrome.runtime.sendMessage({popup: true});
+  chrome.runtime.sendMessage({});
 }
 
 async function getShifts() {
@@ -289,18 +263,17 @@ function getCookie(cname) {
 }
 
 function getDateRange() {
-  // Calculate last Sunday and next Sunday
+  // Calculate date range for the next 2 weeks
   const today = new Date();
   const startDate = new Date(
     today.getFullYear(),
     today.getMonth(),
     today.getDate() - today.getDay() - 1
   );
-  const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const endDate = new Date(startDate.getTime() + 16 * 24 * 60 * 60 * 1000);
 
   // Return the dates
   return { startDate, endDate };
 }
-
 
 actionTiming();

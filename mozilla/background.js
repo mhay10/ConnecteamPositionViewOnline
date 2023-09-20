@@ -9,9 +9,8 @@ let debugMode; // not doing anything right now
 let tabbedMode;
 
 browser.runtime.onMessage.addListener((req, sender, sendRes) => {
-
   // Get config settings
-  chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
+  chrome.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
     debugMode = result.debugModeSet;
     tabbedMode = result.tabbedModeSet;
 
@@ -30,8 +29,7 @@ browser.runtime.onMessage.addListener((req, sender, sendRes) => {
         url: browser.runtime.getURL("popup/index.html"),
         index: 0,
       });
-    }
-    else {
+    } else {
       browser.windows.create({
         url: browser.runtime.getURL("popup/index.html"),
         type: "popup",
