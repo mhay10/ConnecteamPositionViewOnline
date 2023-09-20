@@ -10,16 +10,16 @@ Installing the Extension:
 
   #### Chrome/Chromium:
 
-    1. Merge the provided registry file
-    2. Restart your intended browser
-    3. Go to your browsers extension page and turn on developer mode
-    4. Drag `chromium.crx` from the downloaded release onto the extension page
-    5. Ensure that the extension is enabled
+  1. Merge the provided registry file
+  2. Restart your intended browser
+  3. Go to your browsers extension page and turn on developer mode
+  4. Drag `chromium.crx` from the downloaded release onto the extension page
+  5. Ensure that the extension is enabled
 
   #### Firefox:
-    1. Go to the [latest release](https://github.com/mhay10/ConnecteamPositionViewOnline/releases/latest)
-    2. Click on `mozilla.xpi` under Assets
-    3. Approve the install in the top right of your browser
+  1. Go to the [latest release](https://github.com/mhay10/ConnecteamPositionViewOnline/releases/latest)
+  2. Click on `mozilla.xpi` under Assets
+  3. Approve the install in the top right of your browser
 
 Usage:
 
