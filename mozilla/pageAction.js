@@ -28,7 +28,7 @@ Extension & Other Days: David Jones (aclamendo)
 let debugMode; // not doing anything right now
 let tabbedMode;
 
-chrome.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
+browser.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
   debugMode = result.debugModeSet;
   tabbedMode = result.tabbedModeSet;
 
@@ -173,13 +173,14 @@ async function createPositionView() {
   if (debugMode) console.log(days);
 
   localStorage.setItem("days", JSON.stringify(days));
+
   openSchedulePopup(days);
 }
 
 function openSchedulePopup(days) {
   console.log("Opening schedule popup");
   browser.storage.local.set({ days });
-  browser.runtime.sendMessage({});
+  browser.runtime.sendMessage({popup: true});
 }
 
 async function getShifts() {
@@ -287,6 +288,7 @@ function getDateRange() {
     today.getMonth(),
     today.getDate() - today.getDay() - 7
   );
+
   const endDate = new Date(startDate.getTime() + 28 * 24 * 60 * 60 * 1000);
 
   // Return the dates
@@ -309,7 +311,6 @@ Date.prototype.toLocalISO = function () {
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(Math.abs(offsetMinutes % 60)).padStart(2, '0')}`;
 }
-
 
 actionTiming();
 

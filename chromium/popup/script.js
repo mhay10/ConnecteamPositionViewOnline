@@ -52,6 +52,8 @@ const dayNames = [
 let currentDay = new Date().toISOString().slice(0, 10);
 let days = {};
 
+let dateReference;
+
 // Run once document is loaded
 $(async () => {
   // Get days from local storage
@@ -70,19 +72,6 @@ $(async () => {
     }
   }
 
-  // Move incorrect shifts to correct day
-  for (const { shift, day } of incorrectShifts) {
-    const index = days[day].findIndex(
-      ({ name, jobTitle, startTime, endTime }) =>
-        shift.name === name &&
-        shift.jobTitle === jobTitle &&
-        shift.startTime.getTime() === startTime.getTime() &&
-        shift.endTime.getTime() === endTime.getTime()
-    );
-    const oldShift = days[day].splice(index, 1)[0];
-    const newDay = shift.startTime.toFormattedDate();
-    days[newDay].push(oldShift);
-  }
 
   $("#next").on("click", getNextDay);
   $("#back").on("click", getPrevDay);
@@ -160,6 +149,8 @@ function createPlot(shifts) {
       hovertext: hoverText,
     },
   ];
+
+  dateReference = startTimes[0];
 
   // tabbedMode height adjustments
   let setHeight;
