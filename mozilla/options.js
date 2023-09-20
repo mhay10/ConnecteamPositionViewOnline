@@ -5,9 +5,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     const debugModeCheckbox = document.getElementById('DebugModeElem');
     const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
+    const funyModeCheckbox = document.getElementById('FunyModeElem');
 
-    // Load the current setting from Chrome Storage and update the field state
-    chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
+    // Load the current setting from browser Storage and update the field state
+    browser.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
         // Debugmode
         debugModeCheckbox.checked = result.debugModeSet;
 
@@ -21,19 +22,25 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // Store the updated setting in Chrome Storage
-        chrome.storage.sync.set({
+        // Store the updated setting in browser Storage
+        browser.storage.sync.set({
             debugModeSet: debugModeCheckbox.checked,
             tabbedModeSet: tabbedModeCheckbox.checked
         });
 
+
+        if (funyModeCheckbox.checked) {
+            document.body.setAttribute("style", "background-image: url(https://c.tenor.com/i-6ik9tSTk4AAAAC/fish-spin.gif);")
+        }
+
         // Tell the background script to reload the connecteam page
-        chrome.runtime.sendMessage({ reloadTabs: true });
+        browser.runtime.sendMessage({ reloadTabs: true });
         
         // Put new element on the page indicating the settings are saved
-        saveButton = document.getElementsByClassName("save-area")[0];
+        topBar = document.getElementsByClassName("top-bar")[0];
         let saveText = document.createElement("p");
         saveText.innerText = "Settings Saved!";
-        saveButton.appendChild(saveText);
+        saveText.classList.add("save-message");
+        topBar.prepend(saveText);
     });
 });
