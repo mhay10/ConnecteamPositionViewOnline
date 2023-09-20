@@ -58,14 +58,12 @@ $(async () => {
 
 // Get next day
 function getNextDay() {
-  //currentDay = dayNames[(dayNames.indexOf(currentDay) + 1) % dayNames.length];
   currentDay = days.keys[(days.keys.indexOf(currentDay) + 1) % days.keys.length];
   createPlot(days[currentDay]);
 }
 
 // Get previous day
 function getPrevDay() {
-  //currentDay = dayNames[(dayNames.indexOf(currentDay) + dayNames.length - 1) % dayNames.length];
   currentDay = days.keys[(days.keys.indexOf(currentDay) + days.keys.length - 1) % days.keys.length];
   createPlot(days[currentDay]);
 }
@@ -139,10 +137,6 @@ function createPlot(shifts) {
   else {
     setHeight = window.screen.availHeight * 0.9;
   }
-
-  console.log(currentDay);
-  console.log(currentDay+'T00:00:00.000');
-  console.log(new Date(currentDay+'T00:00:00.000'));
 
   // Set layout
   //let chartHeight = $("#chart").offsetHeight;

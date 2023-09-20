@@ -172,14 +172,6 @@ async function createPositionView() {
     "saturday",
   ];
   for (const shift of assignedShifts) {
-    // // Get the day of the shift
-    // const day = dayNames[new Date(shift.startTime).getDay()];
-
-    // // Make array of shifts for the day if it doesn't exist
-    // if (!days[day]) days[day] = [];
-
-    // // Add shift to the day
-    // days[day].push(shift);
 
     // Get day of shift
     const day = new Date(shift.startTime).toLocalISO().slice(0, 10);
@@ -195,7 +187,7 @@ async function createPositionView() {
   }
 
   days.keys.sort();
-  console.log(days);
+  if (debugMode) console.log(days);
 
   localStorage.setItem("days", JSON.stringify(days));
   openSchedulePopup(days);
