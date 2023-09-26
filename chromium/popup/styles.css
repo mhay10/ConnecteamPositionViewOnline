@@ -39,9 +39,6 @@ button:hover:enabled {
   border: 1px solid #44a6ff;
 }
 
-.downloadButton {
-  text-align: center;
-}
 
 .chart {
   border: 1px solid #d9d9d9;
@@ -56,5 +53,22 @@ button:hover:enabled {
   width: 100%;
   margin: auto;
   display: flex;
-  justify-content: center;
+  align-items: center;
+}
+
+.swapButton {
+  text-align: center;
+  justify-self: left;
+  display: flex;
+}
+
+.footer-button .downloadButton {
+  text-align: center;
+  justify-self: center;
+  align-self: center;
+  left: 39%;
+}
+
+.btn {
+  padding: 0px 33px;
 }

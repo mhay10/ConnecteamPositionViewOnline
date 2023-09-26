@@ -7,10 +7,12 @@
 // Get user set options
 let debugMode; // not doing anything right now
 let tabbedMode;
+let namedMode;
 
-chrome.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
+chrome.storage.sync.get(["debugModeSet", "tabbedModeSet", 'namedModeSet'], function (result) {
   debugMode = result.debugModeSet;
   tabbedMode = result.tabbedModeSet;
+  namedMode = result.namedModeSet;
 
   // Log settings
   console.log("debugMode set to:");
@@ -18,6 +20,15 @@ chrome.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
 
   console.log("tabbedMode set to");
   console.log(tabbedMode);
+
+  console.log("namedMode set to");
+  console.log(namedMode);
+  if (namedMode) {
+    $("#swap").text("Jobs");
+  }
+  else {
+    $("#swap").text("Names");
+  }
 });
 
 // Date formatting
@@ -76,10 +87,24 @@ $(async () => {
   $("#next").on("click", getNextDay);
   $("#back").on("click", getPrevDay);
   $("#download-chart").on("click", downloadPlot);
+  $("#swap").on("click", swapRendering);
 
   // Create chart of selected day
   createPlot(days[currentDay]);
 });
+
+function swapRendering() {
+  if (namedMode) {
+    namedMode = false;
+    $("#swap").text("Names");
+  }
+  else {
+    namedMode = true;
+    $("#swap").text("Jobs");
+  }
+
+  createPlot(days[currentDay]);
+}
 
 // Get next day
 function getNextDay() {
@@ -101,107 +126,248 @@ function downloadPlot() {
 }
 
 function createPlot(shifts) {
-  // Sort shifts by job title
-  shifts.sort((a, b) => a.jobTitle.localeCompare(b.jobTitle));
 
-  // Get colors for each job
-  const shiftColors = shifts.map(({ jobTitle }) =>
-    getColor(getLexographicValue(jobTitle))
-  );
+  if (namedMode) {
+    // Sort shifts by job title
+    shifts.sort((a, b) => a.name.localeCompare(b.name));
 
-  // Create hover popup text
-  const hoverText = shifts.map(({ jobTitle, startTime, endTime }) => {
-    return `<b>${jobTitle}</b><br>${startTime.toFormattedTime()} - ${endTime.toFormattedTime()}`;
-  });
+    // Get colors for each job
+    const shiftColors = shifts.map(({ jobTitle }) =>
+      getColor(getLexographicValue(jobTitle))
+    );
 
-  // Set chart data
-  const durations = shifts.map(
-    ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
-  );
-  const startTimes = shifts.map(({ startTime }) => startTime.getTime());
-  const endTimes = shifts.map(({ endTime }) => endTime.getTime());
-  const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
-  const names = shifts.map(({ name }) => {
-    const split = name.split(" ");
-    return `${split[0]} ${split[split.length - 1][0]}`;
-  });
-  const data = [
-    {
-      type: "bar",
-      x: durations,
-      base: startTimes,
-      marker: {
-        color: shiftColors.map((color) => color + "50"),
-        line: {
-          color: shiftColors,
-          width: 2,
+    if (debugMode) {
+      console.log("Colors:");
+      console.log(shiftColors);
+    }
+
+    // Create hover popup text
+    const hoverText = shifts.map(({ jobTitle, startTime, endTime }) => {
+      return `<b>${jobTitle}</b><br>${startTime.toFormattedTime()} - ${endTime.toFormattedTime()}`;
+    });
+
+    // Set chart data
+    const durations = shifts.map(
+      ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
+    );
+    const startTimes = shifts.map(({ startTime }) => startTime.getTime());
+    const endTimes = shifts.map(({ endTime }) => endTime.getTime());
+    const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
+    const names = shifts.map(({ name }) => {
+      const split = name.split(" ");
+      return `${split[0]} ${split[split.length - 1][0]}`;
+    });
+
+    const nameVals = names.map((name) => names.indexOf(name));
+    
+    if (debugMode) {
+      console.log("Numbers assigned to names:");
+      console.log(nameVals);
+    }
+
+    let data = [];
+    
+    if (debugMode) {
+      console.log("Names, shift names and shift-index:")
+      console.log(names);
+    }
+    
+    for (shift in shifts) {
+      
+      if (debugMode) {
+        console.log(shifts[shift].name);
+        console.log(shift);
+      }
+      data.push(
+      {
+        type: "bar",
+        x: [durations[shift],],
+        y: [nameVals[shift],],
+        base: [startTimes[shift],],
+        marker: {
+          color: [shiftColors[shift] + 50,],
+          line: {
+            color: [shiftColors[shift],],
+            width: 2,
+          },
         },
-      },
-      textposition: "inside",
-      text: names.map((name) => `<b>${name}</b>`),
-      insidetextanchor: "middle",
-      insidetextfont: {
-        size: 14,
-        family: "Arial",
-      },
-      constraintext: "none",
-      hoverinfo: "text",
-      hovertext: hoverText,
-    },
-  ];
+        textposition: "inside",
+        text: [`<b>${shifts[shift].jobTitle}</b>`,],
+        insidetextanchor: "middle",
+        insidetextfont: {
+          size: 14,
+          family: "Arial",
+        },
+        constraintext: "none",
+        hoverinfo: "text",
+        hovertext: [hoverText[shift],],
+        orientation: 'h',
+        offset: -0.4,
+      });
+    }
 
-  dateReference = startTimes[0];
+    if (debugMode) {
+      console.log("All Data:")
+      console.log(data);
+    }
+    dateReference = startTimes[0];
 
-  // tabbedMode height adjustments
-  let setHeight;
-  if (tabbedMode) {
-    setHeight = window.screen.availHeight * 0.825;
-  } else {
-    setHeight = window.screen.availHeight * 0.9;
-  }
+    // tabbedMode height adjustments
+    let setHeight;
+    if (tabbedMode) {
+      setHeight = window.screen.availHeight * 0.825;
+    } else {
+      setHeight = window.screen.availHeight * 0.9;
+    }
 
-  // Set layout
-  //let chartHeight = $("#chart").offsetHeight;
-  let chartWidth = $("#chart").offsetWidth;
-  const dayName = dayNames[getDate(currentDay).getDay()];
-  const layout = {
-    title: `<b>${titleCase(dayNames[new Date(currentDay+'T00:00:00.000').getDay()])} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
-    width: chartWidth, //window.screen.availWidth * 0.89,
-    height: setHeight,
-    xaxis: {
-      title: "<b>Time</b>",
-      type: "date",
-      tickformat: "%I:%M %p",
-      tickangle: -50,
-      tickmode: "linear",
-      dtick: 30 * 60 * 1000,
-      minor: {
+    // Set layout
+    //let chartHeight = $("#chart").offsetHeight;
+    let chartWidth = $("#chart").offsetWidth;
+    const dayName = dayNames[getDate(currentDay).getDay()];
+    const layout = {
+      title: `<b>${titleCase(dayNames[new Date(currentDay+'T00:00:00.000').getDay()])} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
+      width: chartWidth, //window.screen.availWidth * 0.89,
+      height: setHeight,
+      showlegend: false,
+      xaxis: {
+        title: "<b>Time</b>",
+        type: "date",
+        tickformat: "%I:%M %p",
+        tickangle: -50,
         tickmode: "linear",
-        dtick: 15 * 60 * 1000,
-        showgrid: true,
+        dtick: 30 * 60 * 1000,
+        minor: {
+          tickmode: "linear",
+          dtick: 15 * 60 * 1000,
+          showgrid: true,
+        },
+        autorange: false,
+        // Set range to 15 minutes before first shift and 15 minutes after last shift
+        range: [
+          new Date(Math.min(...startTimes) - 25 * 60 * 1000),
+          new Date(Math.max(...endTimes) + 25 * 60 * 1000),
+        ],
+        fixedrange: true,
       },
-      autorange: false,
-      // Set range to 15 minutes before first shift and 15 minutes after last shift
-      range: [
-        new Date(Math.min(...startTimes) - 25 * 60 * 1000),
-        new Date(Math.max(...endTimes) + 25 * 60 * 1000),
-      ],
-      fixedrange: true,
-    },
-    yaxis: {
-      title: "<b>Position</b>",
-      type: "category",
-      tickmode: "array",
-      automargin: true,
-      tickvals: jobTitles.map((_, i) => i),
-      ticktext: jobTitles,
-      showgrid: true,
-      fixedrange: true,
-    },
-  };
+      yaxis: {
+        title: "<b>Position</b>",
+        type: "category",
+        tickmode: "array",
+        automargin: true,
+        tickvals: nameVals,
+        ticktext: names,
+        showgrid: true,
+        fixedrange: true,
+      },
+    };
 
-  // Create chart
-  Plotly.newPlot("chart", data, layout, { displayModeBar: false });
+    // Create chart
+    Plotly.newPlot("chart", data, layout, { displayModeBar: false });
+  }
+  else
+  {
+    // Sort shifts by job title
+    shifts.sort((a, b) => a.jobTitle.localeCompare(b.jobTitle));
+
+    // Get colors for each job
+    const shiftColors = shifts.map(({ jobTitle }) =>
+      getColor(getLexographicValue(jobTitle))
+    );
+
+    // Create hover popup text
+    const hoverText = shifts.map(({ jobTitle, startTime, endTime }) => {
+      return `<b>${jobTitle}</b><br>${startTime.toFormattedTime()} - ${endTime.toFormattedTime()}`;
+    });
+
+    // Set chart data
+    const durations = shifts.map(
+      ({ startTime, endTime }) => endTime.getTime() - startTime.getTime()
+    );
+    const startTimes = shifts.map(({ startTime }) => startTime.getTime());
+    const endTimes = shifts.map(({ endTime }) => endTime.getTime());
+    const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
+    const names = shifts.map(({ name }) => {
+      const split = name.split(" ");
+      return `${split[0]} ${split[split.length - 1][0]}`;
+    });
+    const data = [
+      {
+        type: "bar",
+        x: durations,
+        base: startTimes,
+        marker: {
+          color: shiftColors.map((color) => color + "50"),
+          line: {
+            color: shiftColors,
+            width: 2,
+          },
+        },
+        textposition: "inside",
+        text: names.map((name) => `<b>${name}</b>`),
+        insidetextanchor: "middle",
+        insidetextfont: {
+          size: 14,
+          family: "Arial",
+        },
+        constraintext: "none",
+        hoverinfo: "text",
+        hovertext: hoverText,
+      },
+    ];
+
+    dateReference = startTimes[0];
+
+    // tabbedMode height adjustments
+    let setHeight;
+    if (tabbedMode) {
+      setHeight = window.screen.availHeight * 0.825;
+    } else {
+      setHeight = window.screen.availHeight * 0.9;
+    }
+
+    // Set layout
+    //let chartHeight = $("#chart").offsetHeight;
+    let chartWidth = $("#chart").offsetWidth;
+    const dayName = dayNames[getDate(currentDay).getDay()];
+    const layout = {
+      title: `<b>${titleCase(dayNames[new Date(currentDay+'T00:00:00.000').getDay()])} Schedule (${new Date(dateReference).toISOString().slice(0, 10)})</b>`,
+      width: chartWidth, //window.screen.availWidth * 0.89,
+      height: setHeight,
+      xaxis: {
+        title: "<b>Time</b>",
+        type: "date",
+        tickformat: "%I:%M %p",
+        tickangle: -50,
+        tickmode: "linear",
+        dtick: 30 * 60 * 1000,
+        minor: {
+          tickmode: "linear",
+          dtick: 15 * 60 * 1000,
+          showgrid: true,
+        },
+        autorange: false,
+        // Set range to 15 minutes before first shift and 15 minutes after last shift
+        range: [
+          new Date(Math.min(...startTimes) - 25 * 60 * 1000),
+          new Date(Math.max(...endTimes) + 25 * 60 * 1000),
+        ],
+        fixedrange: true,
+      },
+      yaxis: {
+        title: "<b>Position</b>",
+        type: "category",
+        tickmode: "array",
+        automargin: true,
+        tickvals: jobTitles.map((_, i) => i),
+        ticktext: jobTitles,
+        showgrid: true,
+        fixedrange: true,
+      },
+    };
+
+    // Create chart
+    Plotly.newPlot("chart", data, layout, { displayModeBar: false });
+  }
 }
 
 // Get ascii value of string

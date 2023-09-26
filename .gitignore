@@ -3,3 +3,4 @@
 *.pem
 .vscode/
 Release/
+*.crx

@@ -6,14 +6,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const debugModeCheckbox = document.getElementById('DebugModeElem');
     const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
     const funyModeCheckbox = document.getElementById('FunyModeElem');
+    const namedModeCheckbox = document.getElementById('NamedModeElem');
 
     // Load the current setting from Chrome Storage and update the field state
-    chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
+    chrome.storage.sync.get(['debugModeSet', 'tabbedModeSet', 'namedModeSet'], function (result) {
         // Debugmode
         debugModeCheckbox.checked = result.debugModeSet;
 
         // Tabbed
         tabbedModeCheckbox.checked = result.tabbedModeSet;
+
+        // Named
+        namedModeCheckbox.checked = result.namedModeSet;
 
     });
 
@@ -25,7 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Store the updated setting in Chrome Storage
         chrome.storage.sync.set({
             debugModeSet: debugModeCheckbox.checked,
-            tabbedModeSet: tabbedModeCheckbox.checked
+            tabbedModeSet: tabbedModeCheckbox.checked,
+            namedModeSet: namedModeCheckbox.checked,
         });
 
 
