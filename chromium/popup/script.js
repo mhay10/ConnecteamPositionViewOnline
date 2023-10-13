@@ -9,6 +9,23 @@ let debugMode; // not doing anything right now
 let tabbedMode;
 let namedMode;
 
+
+// New ISO function that converts all stored dates and times to local time zone
+Date.prototype.toLocalISO = function () {
+  const year = this.getFullYear();
+  const month = String(this.getMonth() + 1).padStart(2, '0');
+  const day = String(this.getDate()).padStart(2, '0');
+  const hours = String(this.getHours()).padStart(2, '0');
+  const minutes = String(this.getMinutes()).padStart(2, '0');
+  const seconds = String(this.getSeconds()).padStart(2, '0');
+  const milliseconds = String(this.getMilliseconds()).padStart(3, '0');
+  const offsetMinutes = this.getTimezoneOffset();
+  const offsetHours = Math.abs(offsetMinutes / 60);
+  const offsetSign = offsetMinutes < 0 ? '+' : '-';
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(Math.abs(offsetMinutes % 60)).padStart(2, '0')}`;
+}
+
 chrome.storage.sync.get(["debugModeSet", "tabbedModeSet", 'namedModeSet'], function (result) {
   debugMode = result.debugModeSet;
   tabbedMode = result.tabbedModeSet;
@@ -60,7 +77,7 @@ const dayNames = [
   "saturday",
 ];
 
-let currentDay = new Date().toISOString().slice(0, 10);
+let currentDay = new Date().toLocalISO().slice(0, 10);
 let days = {};
 
 let dateReference;
