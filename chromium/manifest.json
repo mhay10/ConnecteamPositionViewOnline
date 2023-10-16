@@ -1,6 +1,6 @@
 {
   "name": "Connecteam Position View",
-  "version": "2.1",
+  "version": "3.0",
   "description": "Adds position view button and popup. Now fully rendered in the browser.",
 
   "manifest_version": 3,
