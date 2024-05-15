@@ -15,8 +15,10 @@
 
 This is the primary content script that handles the creation of shift data csv files.
 Original Solution:  Max Hay (mhay10)
-Extension & Other Days: David Jones (aclamendo)
+Additional Development & Bugfixes: David Jones (wycre)
 */
+
+
 
 /////////////////////////////
 // Operational flags
@@ -33,28 +35,27 @@ browser.storage.sync.get(["debugModeSet", "tabbedModeSet"], function (result) {
   tabbedMode = result.tabbedModeSet;
 
   // Log settings
-  console.log("debugMode set to:");
+  console.log("[Connecteam Position View] debugMode set to:");
   console.log(debugMode);
 
-  console.log("tabbedMode set to");
+  console.log("[Connecteam Position View] tabbedMode set to");
   console.log(tabbedMode);
 });
 
-/////////////////////////////
-// This function ensures that the rest of the content script will only load when applicable
-// Prevents the script from doing anything further if on the wrong connecteam page
-// Prevents the script from doing anything further if the element where the buttons are placed has not loaded
-/////////////////////////////
-// Makes sure the script is injected only once
+
+
+// Ensure main injection only runs once.
 let runTimes = 0;
 const maxRuns = 1;
 
+/**
+ * This function handles timing of this plugins injection behavior.
+ */
 function actionTiming() {
-  console.log("Watching connecteam SPA for schedules...");
+  console.log("[Connecteam Position View] Watching DOM for schedules...");
 
   // Only run if document.url indicates shift scheduler:
   let url = document.URL;
-  console.log(url);
 
   // observer waits for the button placement element to fully load before running inject
   const observer = new MutationObserver(function (mutationsList) {
@@ -72,7 +73,7 @@ function actionTiming() {
 
   // Check if page is valid immediately
   if (url.match(/shiftscheduler/) != null) {
-    console.log("Scheduling page immediately located, waiting for element...");
+    console.log("[Connecteam Position View] Scheduling page located {1}, waiting for element...");
 
     // start observer and wait
     observer.observe(document, { childList: true, subtree: true });
@@ -83,7 +84,7 @@ function actionTiming() {
     url = document.URL;
 
     if (url.match(/shiftscheduler/) != null) {
-      console.log("Scheduling page located after load, waiting for element...");
+      console.log("[Connecteam Position View] Scheduling page located {2}, waiting for element...");
       runTimes = 0;
 
       // start observer and wait
@@ -92,16 +93,19 @@ function actionTiming() {
   });
 }
 
+/**
+ * Updates DOM to expose main extension behavior
+ */
 async function inject() {
   if (runTimes < maxRuns) {
     runTimes++;
 
-    console.log("Injecting");
+    console.log("[Connecteam Position View] Injecting...");
 
     // Add buttons
     const buttons = document.getElementsByClassName("buttons")[0];
     if (buttons) {
-      console.log("Adding buttons");
+      console.log("[Connecteam Position View] Adding buttons...");
 
       // Add the button to get the shifts
       const shiftsButton = document.createElement("button");
@@ -112,12 +116,14 @@ async function inject() {
       // Add button to the page
       buttons.appendChild(shiftsButton);
 
-      console.log("Buttons added");
+      console.log("[Connecteam Position View] Buttons added");
     }
   }
 }
 
-// Main function to create the position view
+/**
+ * Obtains all shift data and renders position view
+ */
 async function createPositionView() {
   // Get the shifts
   const shifts = await getShifts();
@@ -179,11 +185,15 @@ async function createPositionView() {
 }
 
 function openSchedulePopup(days) {
-  console.log("Opening schedule popup");
+  console.log("[Connecteam Position View] Opening schedule popup");
   browser.storage.local.set({ days });
   browser.runtime.sendMessage({popup: true});
 }
 
+/**
+ * Obtains shifts from the Connecteam API
+ * @returns Object containing Shift data, or nothing.
+ */
 async function getShifts() {
   // Get the date range
   const { startDate, endDate } = getDateRange();
@@ -233,6 +243,10 @@ async function getShifts() {
   return shifts;
 }
 
+/**
+ * Obtains list of jobs and users from Connecteam API
+ * @returns Object containing lists of jobs and users, or nothing.
+ */
 async function getJobsAndUsers() {
   
   // get Course ID and Object ID
@@ -306,7 +320,11 @@ function getDateRange() {
 }
 
 
-// New ISO function that converts all stored dates and times to local time zone
+
+/**
+ * Converts date objects to the ISO string for the current time zone
+ * @returns ISO string representation of this Date in the current time zone
+ */
 Date.prototype.toLocalISO = function () {
   const year = this.getFullYear();
   const month = String(this.getMonth() + 1).padStart(2, '0');
@@ -348,5 +366,6 @@ function getObjectID() {
   return segments[5]
 }
 
+// Start injection wait
 actionTiming();
 
