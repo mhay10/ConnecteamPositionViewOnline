@@ -188,6 +188,10 @@ async function getShifts() {
   // Get the date range
   const { startDate, endDate } = getDateRange();
 
+  // Get Course ID and Object ID
+  courseID = getCourseID();
+  objectID = getObjectID();
+
   // Get shifts from api
   const res = await fetch(
     "https://app.connecteam.com/api/UserDashboard/ShiftScheduler/Shifts/",
@@ -202,8 +206,8 @@ async function getShifts() {
       referrer: "https://app.connecteam.com/index.html",
       referrerPolicy: "strict-origin-when-cross-origin",
       body: JSON.stringify({
-        objectId: "3342741",
-        courseId: "2881759",
+        objectId: objectID,
+        courseId: courseID,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
         timezone: "UTC",
@@ -230,9 +234,14 @@ async function getShifts() {
 }
 
 async function getJobsAndUsers() {
+  
+  // get Course ID and Object ID
+  courseID = getCourseID();
+  objectID = getObjectID();
+  
   // Get jobs and users from api
   const res = await fetch(
-    "https://app.connecteam.com/api/UserDashboard/ShiftScheduler/Data/?objectId=3342741&courseId=2881759",
+    "https://app.connecteam.com/api/UserDashboard/ShiftScheduler/Data/?objectId="+objectID+"&courseId="+courseID,
     {
       headers: {
         accept: "application/json, text/plain, */*",
@@ -311,6 +320,32 @@ Date.prototype.toLocalISO = function () {
   const offsetSign = offsetMinutes < 0 ? '+' : '-';
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(Math.abs(offsetMinutes % 60)).padStart(2, '0')}`;
+}
+
+
+/**
+ * Gets the Course ID for use in API requests
+ * @returns Course ID if found, otherwise 0
+ */
+function getCourseID() {
+  const path = document.URL.split('#')[1];
+
+  const segments = path.split('/');
+
+  return segments[3]
+
+}
+
+/**
+ * Gets the Object ID for use in API requests
+ * @returns Object ID if found, otherwise 0
+ */
+function getObjectID() {
+  const path = document.URL.split('#')[1];
+
+  const segments = path.split('/');
+
+  return segments[5]
 }
 
 actionTiming();
