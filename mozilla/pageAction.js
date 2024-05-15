@@ -137,6 +137,7 @@ async function createPositionView() {
     return {
       jobTitle: job.title,
       name: `${user.firstname} ${user.lastname}`,
+      color: job.color,
       startTime: new Date(startTime * 1000).toLocalISO(),
       endTime: new Date(endTime * 1000).toLocalISO(),
     };
