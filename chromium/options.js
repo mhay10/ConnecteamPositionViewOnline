@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     const debugModeCheckbox = document.getElementById('DebugModeElem');
     const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
-    const funyModeCheckbox = document.getElementById('FunyModeElem');
     const namedModeCheckbox = document.getElementById('NamedModeElem');
 
     // Load the current setting from Chrome Storage and update the field state
@@ -33,14 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
             namedModeSet: namedModeCheckbox.checked,
         });
 
-
-        if (funyModeCheckbox.checked) {
-            document.body.setAttribute("style", "background-image: url(https://c.tenor.com/i-6ik9tSTk4AAAAC/fish-spin.gif);")
-            let sound = new Audio("https://drive.google.com/uc?id=1Bw09LUjSOLB3CZtdpOBY5DpGfrP0an_U&export=download");
-            sound.loop = true;
-            document.body.appendChild(sound);
-            sound.play();
-        }
 
         // Tell the background script to reload the connecteam page
         chrome.runtime.sendMessage({ reloadTabs: true });

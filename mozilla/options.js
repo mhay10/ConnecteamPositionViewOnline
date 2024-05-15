@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     const debugModeCheckbox = document.getElementById('DebugModeElem');
     const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
-    const funyModeCheckbox = document.getElementById('FunyModeElem');
 
     // Load the current setting from browser Storage and update the field state
     browser.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
@@ -28,10 +27,6 @@ document.addEventListener('DOMContentLoaded', function () {
             tabbedModeSet: tabbedModeCheckbox.checked
         });
 
-
-        if (funyModeCheckbox.checked) {
-            document.body.setAttribute("style", "background-image: url(https://c.tenor.com/i-6ik9tSTk4AAAAC/fish-spin.gif);")
-        }
 
         // Tell the background script to reload the connecteam page
         browser.runtime.sendMessage({ reloadTabs: true });
