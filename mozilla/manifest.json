@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Connecteam Position View",
-  "version": "3.0",
+  "version": "3.1",
   "description": "Adds position view button and popup. Now fully rendered in the browser.",
   "permissions": [
     "storage",
@@ -28,7 +28,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "connecteampositionviewonline@github.com"
+      "id": "connecteam-position-view-wycre-local@github.com"
     }
   },
   "browser_action": {
