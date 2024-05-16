@@ -1,6 +1,7 @@
 # Connecteam Position View Online
 
 Connecteam Position View is a browser extension that creates a Gantt-Chart-Like looking visualization shifts published in the Connecteam app.
+![2024-05-16-thursday-schedule(1)](https://github.com/mhay10/ConnecteamPositionViewOnline/assets/34517662/b067241f-506c-4c39-aeec-4feb1c0d4427)
 
 *********************
 
