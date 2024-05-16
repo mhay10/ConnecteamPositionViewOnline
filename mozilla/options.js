@@ -5,14 +5,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     const debugModeCheckbox = document.getElementById('DebugModeElem');
     const tabbedModeCheckbox = document.getElementById('TabbedModeElem');
+    const namedModeCheckbox = document.getElementById('NamedModeElem');
 
     // Load the current setting from browser Storage and update the field state
-    browser.storage.sync.get(['debugModeSet', 'tabbedModeSet'], function (result) {
+    browser.storage.sync.get(['debugModeSet', 'tabbedModeSet', 'namedModeSet'], function (result) {
         // Debugmode
         debugModeCheckbox.checked = result.debugModeSet;
 
         // Tabbed
         tabbedModeCheckbox.checked = result.tabbedModeSet;
+
+        // Named
+        namedModeCheckbox.checked = result.namedModeSet;
 
     });
 
@@ -24,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Store the updated setting in browser Storage
         browser.storage.sync.set({
             debugModeSet: debugModeCheckbox.checked,
-            tabbedModeSet: tabbedModeCheckbox.checked
+            tabbedModeSet: tabbedModeCheckbox.checked,
+            namedModeSet: namedModeCheckbox.checked,
         });
 
 
