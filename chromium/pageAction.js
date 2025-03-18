@@ -131,22 +131,40 @@ async function createPositionView() {
 
   // Assign shifts to users
   const assignedShifts = shifts.map((shift) => {
-    // Get the shift info
-    const { jobId, startTime, endTime } = shift;
-    const userId = shift.assignedUserIds[0];
+    
+    // If Shift is Open To Claim
+    if (shift.assignedUserIds.length == 0) {
+      const { jobId, startTime, endTime } = shift;
+      const job = jobs.find((job) => job.id === jobId);
 
-    // Get the job and user info
-    const job = jobs.find((job) => job.id === jobId);
-    const user = users.find((user) => user.id === userId);
+      return {
+        jobTitle: job.title,
+        name: `Open To Claim`,
+        color: job.color,
+        startTime: new Date(startTime * 1000).toLocalISO(),
+        endTime: new Date(endTime * 1000).toLocalISO(),
+      }
+    }
 
-    // Return job title, user's name, and start and end times
-    return {
-      jobTitle: job.title,
-      name: `${user.firstname} ${user.lastname}`,
-      color: job.color,
-      startTime: new Date(startTime * 1000).toLocalISO(),
-      endTime: new Date(endTime * 1000).toLocalISO(),
-    };
+    // If the shift has an assigned User
+    else {
+      // Get the shift info
+      const { jobId, startTime, endTime } = shift;
+      const userId = shift.assignedUserIds[0];
+
+      // Get the job and user info
+      const job = jobs.find((job) => job.id === jobId);
+      const user = users.find((user) => user.id === userId);
+
+      // Return job title, user's name, and start and end times
+      return {
+        jobTitle: job.title,
+        name: `${user.firstname} ${user.lastname}`,
+        color: job.color,
+        startTime: new Date(startTime * 1000).toLocalISO(),
+        endTime: new Date(endTime * 1000).toLocalISO(),
+      };
+    }
   });
 
   // Sort shifts into days

@@ -208,8 +208,13 @@ function createPlot(shifts) {
     const endTimes = shifts.map(({ endTime }) => endTime.getTime());
     const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
     const names = shifts.map(({ name }) => {
-      const split = name.split(" ");
-      return `${split[0]} ${split[split.length - 1][0]}`;
+      if (name !== `Open To Claim`) {
+        const split = name.split(" ");
+        return `${split[0]} ${split[split.length - 1][0]}`;
+      }
+      else {
+        return name;
+      }
     });
 
     const nameVals = names.map((name) => names.indexOf(name));
@@ -343,8 +348,13 @@ function createPlot(shifts) {
     const endTimes = shifts.map(({ endTime }) => endTime.getTime());
     const jobTitles = shifts.map(({ jobTitle }) => jobTitle);
     const names = shifts.map(({ name }) => {
-      const split = name.split(" ");
-      return `${split[0]} ${split[split.length - 1][0]}`;
+      if (name !== `Open To Claim`) {
+        const split = name.split(" ");
+        return `${split[0]} ${split[split.length - 1][0]}`;
+      }
+      else {
+        return name;
+      }
     });
     const data = [
       {
